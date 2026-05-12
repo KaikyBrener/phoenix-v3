@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHOENIX V1 - Conversor de Imagem para Base64</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="../css/css_style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid min-vh-100 bg-dark">
+        <div class="row h-100">
+            <!-- Sidebar -->
+            <nav class="col-lg-2 bg-darker sidebar p-0">
+                <div class="p-4 border-bottom border-secondary">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-fire text-danger fs-3"></i>
+                        <span class="fw-bold text-white fs-5">PHOENIX V1</span>
+                    </div>
+                </div>
+
+                <div class="p-3">
+                    <div class="mb-4">
+                        <h6 class="text-danger text-uppercase fw-bold mb-3">Navegação</h6>
+                        <div class="nav flex-column">
+                            <button class="nav-link btn btn-link text-start text-white-50 mb-2 active" data-tab="dashboard">
+                                <i class="bi bi-house-fill me-2"></i> Dashboard
+                            </button>
+                            <button class="nav-link btn btn-link text-start text-white-50 mb-2" data-tab="conversor">
+                                <i class="bi bi-arrow-left-right me-2"></i> Conversor
+                            </button>
+                            <button class="nav-link btn btn-link text-start text-white-50 mb-2" data-tab="historico">
+                                <i class="bi bi-clock-history me-2"></i> Histórico
+                            </button>
+                            <button class="nav-link btn btn-link text-start text-white-50" data-tab="favoritos">
+                                <i class="bi bi-heart-fill me-2"></i> Favoritos
+                            </button>
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary">
+
+                    <div class="mb-4">
+                        <h6 class="text-danger text-uppercase fw-bold mb-3">Ferramentas</h6>
+                        <div class="nav flex-column">
+                            <button class="nav-link btn btn-link text-start text-white-50 mb-2" data-tool="imagem-base64">
+                                <i class="bi bi-image me-2"></i> Imagem para Base64
+                            </button>
+                            <button class="nav-link btn btn-link text-start text-white-50 mb-2" data-tool="base64-imagem">
+                                <i class="bi bi-file-earmark-image me-2"></i> Base64 para Imagem
+                            </button>
+                            <button class="nav-link btn btn-link text-start text-white-50" data-tool="editor-texto">
+                                <i class="bi bi-pencil-square me-2"></i> Editor de Texto
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <main class="col-lg-10 p-4">
+                <!-- Dashboard Tab -->
+                <div class="tab-content" id="dashboard" style="display: block;">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h2 class="text-white mb-2">Bem-vindo ao <span class="text-danger">PHOENIX V1</span></h2>
+                            <p class="text-white-50">Converta suas imagens para Base64 de forma rápida, segura e eficiente.</p>
+                        </div>
+                    </div>
+
+                    <!-- Cards de Info -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 mb-3">
+                            <div class="card bg-darker border-secondary">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <p class="text-white-50 mb-1">Conversões Hoje</p>
+                                            <h4 class="text-danger mb-0" id="conversoes-hoje">0</h4>
+                                        </div>
+                                        <i class="bi bi-arrow-repeat text-danger fs-2"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <div class="card bg-darker border-secondary">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <p class="text-white-50 mb-1">Imagens Processadas</p>
+                                            <h4 class="text-danger mb-0" id="imagens-processadas">0</h4>
+                                        </div>
+                                        <i class="bi bi-images text-danger fs-2"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <div class="card bg-darker border-secondary">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <p class="text-white-50 mb-1">Favoritos</p>
+                                            <h4 class="text-danger mb-0" id="favoritos-count">0</h4>
+                                        </div>
+                                        <i class="bi bi-heart-fill text-danger fs-2"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 mb-3">
+                            <div class="card bg-darker border-secondary">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <p class="text-white-50 mb-1">Taxa de Sucesso</p>
+                                            <h4 class="text-danger mb-0" id="taxa-sucesso">100%</h4>
+                                        </div>
+                                        <i class="bi bi-check-circle-fill text-danger fs-2"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Histórico Recente -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card bg-darker border-secondary">
+                                <div class="card-header bg-darker border-secondary">
+                                    <h5 class="text-white mb-0">
+                                        <i class="bi bi-clock-history text-danger me-2"></i>Histórico Recente
+                                    </h5>
+                                </div>
+                                <div class="card-body" id="historico-recente">
+                                    <p class="text-white-50">Nenhuma conversão realizada ainda.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conversor Tab -->
+                <div class="tab-content" id="conversor" style="display: none;">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h2 class="text-white mb-2">Conversor de Imagem</h2>
+                            <p class="text-white-50">Envie sua imagem e converta para Base64</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Upload Section -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card bg-darker border-danger border-2">
+                                <div class="card-header bg-darker border-danger">
+                                    <h5 class="text-danger mb-0">
+                                        <i class="bi bi-cloud-arrow-up me-2"></i>1. Envie sua imagem
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="upload-area border-2 border-dashed border-danger rounded p-5 text-center cursor-pointer" id="uploadArea">
+                                        <i class="bi bi-cloud-arrow-up text-danger fs-1 mb-3 d-block"></i>
+                                        <p class="text-white mb-2">Arraste sua imagem aqui ou clique para selecionar</p>
+                                        <small class="text-white-50 d-block mb-3">Suporte: PNG, JPG, JPEG, WEBP</small>
+                                        <small class="text-white-50 d-block">Tamanho máximo: 10MB</small>
+                                        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preview Section -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card bg-darker border-secondary">
+                                <div class="card-header bg-darker border-secondary">
+                                    <h5 class="text-danger mb-0">
+                                        <i class="bi bi-eye me-2"></i>2. Pré-visualização
+                                    </h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    <div id="previewContainer" style="min-height: 300px; display: flex; align-items: center; justify-content: center;">
+                                        <p class="text-white-50">Sua imagem aparecerá aqui</p>
+                                    </div>
+                                    <div id="imageInfo" style="display: none;" class="mt-3 text-start">
+                                        <small class="text-white-50">
+                                            Nome: <span class="text-white" id="imageName">-</span><br>
+                                            Tipo: <span class="text-white" id="imageType">-</span><br>
+                                            Tamanho: <span class="text-white" id="imageSize">-</span>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Base64 Output -->
+                    <div class="row">
+                        <div class="col-12 mb-4">
+                            <div class="card bg-darker border-secondary">
+                                <div class="card-header bg-darker border-secondary">
+                                    <h5 class="text-danger mb-0">
+                                        <i class="bi bi-code me-2"></i>3. Código Base64
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <textarea class="form-control bg-darker text-white border-secondary" id="base64Output" rows="6" placeholder="Seu código Base64 aparecerá aqui..." readonly></textarea>
+                                    <div class="d-flex gap-2 mt-3">
+                                        <button class="btn btn-danger" id="copyBtn" disabled>
+                                            <i class="bi bi-files me-2"></i>Copiar Código
+                                        </button>
+                                        <button class="btn btn-outline-danger" id="downloadBtn" disabled>
+                                            <i class="bi bi-download me-2"></i>Download TXT
+                                        </button>
+                                        <button class="btn btn-outline-danger" id="addFavoriteBtn" disabled>
+                                            <i class="bi bi-heart me-2"></i>Adicionar aos Favoritos
+                                        </button>
+                                        <button class="btn btn-outline-danger ms-auto" id="limparBtn">
+                                            <i class="bi bi-trash me-2"></i>Limpar Tudo
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-darker border-secondary">
+                                <div class="card-body">
+                                    <p class="text-white-50 mb-1">Tamanho da Imagem</p>
+                                    <h5 class="text-danger mb-0" id="tamanhoImagem">-</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-darker border-secondary">
+                                <div class="card-body">
+                                    <p class="text-white-50 mb-1">Tamanho do Base64</p>
+                                    <h5 class="text-danger mb-0" id="tamanhoBase64">-</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-darker border-secondary">
+                                <div class="card-body">
+                                    <p class="text-white-50 mb-1">Proporção</p>
+                                    <h5 class="text-danger mb-0" id="proporcao">-</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Histórico Tab -->
+                <div class="tab-content" id="historico" style="display: none;">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h2 class="text-white mb-2">Histórico de Conversões</h2>
+                                    <p class="text-white-50">Todas as suas conversões salvas localmente</p>
+                                </div>
+                                <button class="btn btn-outline-danger" id="limparHistoricoBtn">
+                                    <i class="bi bi-trash me-2"></i>Limpar Histórico
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div id="historicoList" class="list-group">
+                                <p class="text-white-50 py-4">Nenhuma conversão no histórico ainda.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Favoritos Tab -->
+                <div class="tab-content" id="favoritos" style="display: none;">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h2 class="text-white mb-2">Conversões Favoritas</h2>
+                                    <p class="text-white-50">Suas imagens e códigos favoritados</p>
+                                </div>
+                                <button class="btn btn-outline-danger" id="limparFavoritosBtn">
+                                    <i class="bi bi-trash me-2"></i>Limpar Favoritos
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div id="favoritosList" class="list-group">
+                                <p class="text-white-50 py-4">Nenhum favorito salvo ainda.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Base64 para Imagem Tab -->
+                <div class="tab-content" id="base64-imagem" style="display: none;">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h2 class="text-white mb-2">Base64 para Imagem</h2>
+                            <p class="text-white-50">Converta código Base64 de volta para uma imagem</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Input Section -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card bg-darker border-danger border-2">
+                                <div class="card-header bg-darker border-danger">
+                                    <h5 class="text-danger mb-0">
+                                        <i class="bi bi-code me-2"></i>1. Cole o código Base64
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <textarea class="form-control bg-darker text-white border-secondary" id="base64Input" rows="8" placeholder="Cole o código Base64 aqui..."></textarea>
+                                    <button class="btn btn-danger mt-3 w-100" id="converterBtn">
+                                        <i class="bi bi-arrow-repeat me-2"></i>Converter para Imagem
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preview Section -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card bg-darker border-secondary">
+                                <div class="card-header bg-darker border-secondary">
+                                    <h5 class="text-danger mb-0">
+                                        <i class="bi bi-eye me-2"></i>2. Pré-visualização
+                                    </h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    <div id="base64PreviewContainer" style="min-height: 300px; display: flex; align-items: center; justify-content: center;">
+                                        <p class="text-white-50">A imagem aparecerá aqui</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Download Section -->
+                    <div class="row">
+                        <div class="col-12 mb-4">
+                            <div class="card bg-darker border-secondary">
+                                <div class="card-body">
+                                    <button class="btn btn-danger" id="downloadImageBtn" disabled>
+                                        <i class="bi bi-download me-2"></i>Download da Imagem
+                                    </button>
+                                    <button class="btn btn-outline-danger ms-2" id="limparBase64Btn">
+                                        <i class="bi bi-trash me-2"></i>Limpar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Editor de Texto Tab -->
+                <div class="tab-content" id="editor-texto" style="display: none;">
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h2 class="text-white mb-2">Editor de Texto</h2>
+                            <p class="text-white-50">Edite e codifique seus textos em Base64</p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Text Input -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card bg-darker border-danger border-2">
+                                <div class="card-header bg-darker border-danger">
+                                    <h5 class="text-danger mb-0">
+                                        <i class="bi bi-pencil-square me-2"></i>Seu Texto
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <textarea class="form-control bg-darker text-white border-secondary" id="textInput" rows="10" placeholder="Digite ou cole seu texto aqui..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Base64 Output -->
+                        <div class="col-lg-6 mb-4">
+                            <div class="card bg-darker border-secondary">
+                                <div class="card-header bg-darker border-secondary">
+                                    <h5 class="text-danger mb-0">
+                                        <i class="bi bi-code me-2"></i>Base64 Codificado
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <textarea class="form-control bg-darker text-white border-secondary" id="textBase64Output" rows="10" placeholder="O texto codificado aparecerá aqui..." readonly></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="row">
+                        <div class="col-12 mb-4">
+                            <div class="card bg-darker border-secondary">
+                                <div class="card-body">
+                                    <button class="btn btn-danger" id="codificarTextBtn">
+                                        <i class="bi bi-arrow-right me-2"></i>Codificar para Base64
+                                    </button>
+                                    <button class="btn btn-outline-danger ms-2" id="decodificarTextBtn">
+                                        <i class="bi bi-arrow-left me-2"></i>Decodificar Base64
+                                    </button>
+                                    <button class="btn btn-outline-danger ms-2" id="copiarTextBtn">
+                                        <i class="bi bi-files me-2"></i>Copiar
+                                    </button>
+                                    <button class="btn btn-outline-danger ms-2" id="limparTextBtn">
+                                        <i class="bi bi-trash me-2"></i>Limpar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    
+    <!-- Storage JS -->
+    <script src="../js/js_storage.js"></script>
+    
+    <!-- Converter JS -->
+    <script src="../js/js_converter.js"></script>
+    
+    <!-- App JS -->
+    <script src="../js/js_app.js"></script>
+</body>
+</html>
