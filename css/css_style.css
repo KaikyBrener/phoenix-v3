@@ -522,6 +522,8 @@ textarea.form-control {
     background: linear-gradient(180deg, rgba(18, 18, 18, 0.98), rgba(10, 10, 10, 0.98)) !important;
     border: 1px solid var(--border-color) !important;
     backdrop-filter: blur(20px);
+    left: 50% !important;
+    transform: translateX(-50%) !important;
 }
 
 .swal2-confirm {
