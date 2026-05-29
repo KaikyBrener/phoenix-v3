@@ -199,7 +199,9 @@ class PhoenixApp {
                 icon: 'error',
                 confirmButtonColor: '#ff6b35',
                 background: '#1a1a1a',
-                color: '#fff'
+                color: '#fff',
+                toast: true,
+                position: 'top-end'
             });
         });
     }
@@ -291,7 +293,9 @@ class PhoenixApp {
                     confirmButtonColor: '#ff6b35',
                     background: '#1a1a1a',
                     color: '#fff',
-                    timer: 2000
+                    timer: 2000,
+                    toast: true,
+                    position: 'top-end'
                 });
             }
         });
@@ -322,7 +326,9 @@ class PhoenixApp {
                     confirmButtonColor: '#ff6b35',
                     background: '#1a1a1a',
                     color: '#fff',
-                    timer: 2000
+                    timer: 2000,
+                    toast: true,
+                    position: 'top-end'
                 });
             }
         });
@@ -353,7 +359,9 @@ class PhoenixApp {
                     confirmButtonColor: '#ff6b35',
                     background: '#1a1a1a',
                     color: '#fff',
-                    timer: 2000
+                    timer: 2000,
+                    toast: true,
+                    position: 'top-end'
                 });
             }
         });
