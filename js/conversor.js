@@ -10,21 +10,21 @@ class ConversorImagens {
         this.metadadosAtual = null;
     }
 
-    validar(arquivo) {
-        const tiposPermitidos = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
-        const tamanhoMaximo = 10 * 1024 * 1024; // 10MB
+    validarImagem(arquivo) {
+        const tiposPermitidos = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
+        const tamanhoMaximo = 3 * 1024 * 1024; // 3MB (Garante que o Base64 final não passe de ~4MB)
 
         if (!tiposPermitidos.includes(arquivo.type)) {
             return {
                 valido: false,
-                erro: 'Tipo de arquivo não suportado. Use PNG, JPG, JPEG ou WEBP.'
+                erro: 'Tipo de arquivo não suportado. Use PNG, JPG, JPEG, GIF ou WEBP.'
             };
         }
 
         if (arquivo.size > tamanhoMaximo) {
             return {
                 valido: false,
-                erro: 'Arquivo muito grande. Tamanho máximo: 10MB'
+                erro: 'Arquivo muito grande. Tamanho máximo permitido: 3MB.'
             };
         }
 
@@ -102,10 +102,18 @@ class ConversorImagens {
         return this._formatarTamanho(tamanhoBase64);
     }
 
-    obterProporacao(arquivoImagem) {
+    calcularTamanhoReduzido(arquivoImagem) {
+        return this.obterTamanhoBase64(arquivoImagem);
+    }
+
+    obterProporção(arquivoImagem) {
         const original = arquivoImagem.size;
         const codificado = Math.ceil((original / 3) * 4);
         return `1:${(codificado / original).toFixed(2)}`;
+    }
+
+    calcularProporção(arquivoImagem) {
+        return this.obterProporção(arquivoImagem);
     }
 
     obterImagemAtual() {
@@ -124,6 +132,93 @@ class ConversorImagens {
         this.imagemAtual = null;
         this.base64Atual = null;
         this.metadadosAtual = null;
+    }
+}
+
+class AlertHelper {
+    static theme = {
+        confirmButtonColor: '#ff6b35',
+        background: '#1a1a1a',
+        color: '#fff'
+    };
+
+    static success(title, text, options = {}) {
+        return Swal.fire({
+            title,
+            text,
+            icon: 'success',
+            ...this.theme,
+            timer: 2000,
+            ...options
+        });
+    }
+
+    static error(title, text, options = {}) {
+        return Swal.fire({
+            title,
+            text,
+            icon: 'error',
+            ...this.theme,
+            ...options
+        });
+    }
+
+    static warning(title, text, options = {}) {
+        return Swal.fire({
+            title,
+            text,
+            icon: 'warning',
+            ...this.theme,
+            ...options
+        });
+    }
+
+    static info(title, text, options = {}) {
+        return Swal.fire({
+            title,
+            text,
+            icon: 'info',
+            ...this.theme,
+            ...options
+        });
+    }
+
+    static confirm(title, text, options = {}) {
+        return Swal.fire({
+            title,
+            text,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ff6b35',
+            cancelButtonColor: '#666',
+            confirmButtonText: 'Sim',
+            cancelButtonText: 'Cancelar',
+            ...this.theme,
+            ...options
+        });
+    }
+
+    static loading(title = 'Processando...', text = '') {
+        return Swal.fire({
+            title,
+            text,
+            icon: 'info',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+            ...this.theme
+        });
+    }
+
+    static toast(title, icon = 'success', options = {}) {
+        return Swal.fire({
+            title,
+            icon,
+            timer: 2000,
+            toast: true,
+            position: 'top-end',
+            ...this.theme,
+            ...options
+        });
     }
 }
 

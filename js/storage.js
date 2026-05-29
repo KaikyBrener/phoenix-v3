@@ -34,18 +34,36 @@ class StorageManager {
 
         this.historico.unshift(novoItem);
 
-        // Manter apenas 100 itens mais recentes
-        if (this.historico.length > 100) {
-            this.historico = this.historico.slice(0, 100);
+        // Manter apenas 20 itens mais recentes (FIFO)
+        if (this.historico.length > 20) {
+            this.historico = this.historico.slice(0, 20);
         }
 
         try {
             this.salvarHistorico();
         } catch (e) {
-            if (e.name === 'QuotaExceededError') {
-                // Fallback: manter apenas últimos 50 itens
-                this.historico = this.historico.slice(0, 50);
-                this.salvarHistorico();
+            if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                // Iterativamente remover os itens mais antigos até ter espaço
+                while (this.historico.length > 1) {
+                    this.historico.pop(); // Remove o último (mais antigo)
+                    try {
+                        this.salvarHistorico();
+                        break; // Conseguiu salvar!
+                    } catch (e2) {
+                        // Continua o loop se ainda estiver cheio
+                    }
+                }
+                
+                // Se só tem 1 item (o atual) e ainda dá erro, o próprio arquivo excede a cota
+                if (this.historico.length === 1) {
+                    try {
+                        this.salvarHistorico();
+                    } catch (e3) {
+                        this.historico = []; // Desiste de salvar no histórico para não quebrar a aplicação
+                        this.salvarHistorico();
+                        console.warn("Item muito grande para ser salvo no histórico.");
+                    }
+                }
             } else {
                 throw e;
             }
@@ -101,10 +119,27 @@ class StorageManager {
         try {
             this.salvarFavoritos();
         } catch (e) {
-            if (e.name === 'QuotaExceededError') {
-                this.favoritos = this.favoritos.slice(0, Math.max(5, this.favoritos.length - 10));
-                this.salvarFavoritos();
-                return { sucesso: false, mensagem: 'Espaço de armazenamento cheio. Alguns favoritos foram removidos.' };
+            if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                // Se excedeu, remove o favorito mais antigo até caber
+                while (this.favoritos.length > 1) {
+                    this.favoritos.pop();
+                    try {
+                        this.salvarFavoritos();
+                        return { sucesso: false, mensagem: 'Espaço cheio. O favorito mais antigo foi removido para dar espaço.' };
+                    } catch (e2) {
+                        // Continua removendo
+                    }
+                }
+                
+                if (this.favoritos.length === 1) {
+                    try {
+                        this.salvarFavoritos();
+                    } catch (e3) {
+                        this.favoritos = [];
+                        this.salvarFavoritos();
+                        return { sucesso: false, mensagem: 'O arquivo é muito grande para os favoritos.' };
+                    }
+                }
             } else {
                 throw e;
             }

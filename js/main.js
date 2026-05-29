@@ -79,30 +79,13 @@ class PhoenixApp {
         // Validar
         const validacao = this.converter.validarImagem(file);
         if (!validacao.valido) {
-            Swal.fire({
-                title: 'Erro na validação',
-                text: validacao.erro,
-                icon: 'error',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
-            });
+            AlertHelper.error('Erro na validação', validacao.erro);
             return;
         }
 
         try {
             // Mostrar loading
-            Swal.fire({
-                title: 'Processando...',
-                text: 'Convertendo imagem para Base64',
-                icon: 'info',
-                allowOutsideClick: false,
-                didOpen: (modal) => {
-                    Swal.showLoading();
-                },
-                background: '#1a1a1a',
-                color: '#fff'
-            });
+            AlertHelper.loading('Processando...', 'Convertendo imagem para Base64');
 
             // Converter
             const { base64, metadados } = await this.converter.converterParaBase64(file);
@@ -126,25 +109,13 @@ class PhoenixApp {
             Swal.close();
 
             // Mostrar sucesso
-            Swal.fire({
+            AlertHelper.toast('Sucesso!', 'success', {
                 title: 'Sucesso!',
-                text: 'Imagem convertida com sucesso',
-                icon: 'success',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff',
-                timer: 2000
+                text: 'Imagem convertida com sucesso'
             });
 
         } catch (erro) {
-            Swal.fire({
-                title: 'Erro ao processar',
-                text: erro.message,
-                icon: 'error',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
-            });
+            AlertHelper.error('Erro ao processar', erro.message);
         }
     }
 
@@ -167,9 +138,10 @@ class PhoenixApp {
         document.getElementById('imageInfo').style.display = 'block';
 
         // Estatísticas
+        const imagemAtual = this.converter.obterImagemAtual();
         document.getElementById('tamanhoImagem').textContent = metadados.tamanho;
-        document.getElementById('tamanhoBase64').textContent = this.converter.calcularTamanhoReduzido(this.converter.obterImagemAtual());
-        document.getElementById('proporcao').textContent = this.converter.calcularProporção(this.converter.obterImagemAtual());
+        document.getElementById('tamanhoBase64').textContent = imagemAtual ? this.converter.calcularTamanhoReduzido(imagemAtual) : '-';
+        document.getElementById('proporcao').textContent = imagemAtual ? this.converter.calcularProporção(imagemAtual) : '-';
 
         // Habilitar botões
         document.getElementById('copyBtn').disabled = false;
@@ -181,27 +153,12 @@ class PhoenixApp {
     copiarBase64() {
         const base64Output = document.getElementById('base64Output');
         navigator.clipboard.writeText(base64Output.value).then(() => {
-            Swal.fire({
-                title: 'Copiado!',
-                text: 'Base64 copiado para a área de transferência',
-                icon: 'success',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff',
-                timer: 2000,
-                toast: true,
-                position: 'top-end'
+            AlertHelper.toast('Copiado!', 'success', {
+                text: 'Base64 copiado para a área de transferência'
             });
         }).catch(() => {
-            Swal.fire({
-                title: 'Erro',
-                text: 'Falha ao copiar',
-                icon: 'error',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff',
-                toast: true,
-                position: 'top-end'
+            AlertHelper.toast('Erro', 'error', {
+                text: 'Falha ao copiar'
             });
         });
     }
@@ -219,16 +176,8 @@ class PhoenixApp {
         element.click();
         document.body.removeChild(element);
 
-        Swal.fire({
-            title: 'Download iniciado!',
-            text: 'Arquivo salvo com sucesso',
-            icon: 'success',
-            confirmButtonColor: '#ff6b35',
-            background: '#1a1a1a',
-            color: '#fff',
-            timer: 2000,
-            toast: true,
-            position: 'top-end'
+        AlertHelper.toast('Download iniciado!', 'success', {
+            text: 'Arquivo salvo com sucesso'
         });
     }
 
@@ -244,16 +193,8 @@ class PhoenixApp {
             preview: document.querySelector('#previewContainer img')?.src || ''
         });
 
-        Swal.fire({
-            title: resultado.sucesso ? 'Adicionado!' : 'Aviso',
-            text: resultado.mensagem,
-            icon: resultado.sucesso ? 'success' : 'warning',
-            confirmButtonColor: '#ff6b35',
-            background: '#1a1a1a',
-            color: '#fff',
-            timer: 2000,
-            toast: true,
-            position: 'top-end'
+        AlertHelper.toast(resultado.sucesso ? 'Adicionado!' : 'Aviso', resultado.sucesso ? 'success' : 'warning', {
+            text: resultado.mensagem
         });
 
         if (resultado.sucesso) {
@@ -262,17 +203,9 @@ class PhoenixApp {
     }
 
     limparConversor() {
-        Swal.fire({
-            title: 'Limpar tudo?',
-            text: 'Isso vai limpar a imagem, preview e Base64',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ff6b35',
-            cancelButtonColor: '#666',
+        AlertHelper.confirm('Limpar tudo?', 'Isso vai limpar a imagem, preview e Base64', {
             confirmButtonText: 'Sim, limpar',
-            cancelButtonText: 'Cancelar',
-            background: '#1a1a1a',
-            color: '#fff'
+            cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
                 this.converter.limpar();
@@ -286,82 +219,42 @@ class PhoenixApp {
                 document.getElementById('tamanhoBase64').textContent = '-';
                 document.getElementById('proporcao').textContent = '-';
 
-                Swal.fire({
-                    title: 'Limpo!',
-                    text: 'Tudo foi limpo com sucesso',
-                    icon: 'success',
-                    confirmButtonColor: '#ff6b35',
-                    background: '#1a1a1a',
-                    color: '#fff',
-                    timer: 2000,
-                    toast: true,
-                    position: 'top-end'
+                AlertHelper.toast('Limpo!', 'success', {
+                    text: 'Tudo foi limpo com sucesso'
                 });
             }
         });
     }
 
     limparHistorico() {
-        Swal.fire({
-            title: 'Limpar histórico?',
-            text: 'Essa ação não pode ser desfeita',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ff6b35',
-            cancelButtonColor: '#666',
+        AlertHelper.confirm('Limpar histórico?', 'Essa ação não pode ser desfeita', {
             confirmButtonText: 'Sim, limpar',
-            cancelButtonText: 'Cancelar',
-            background: '#1a1a1a',
-            color: '#fff'
+            cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
                 this.storage.limparHistorico();
                 this.atualizarHistorico();
                 this.atualizarDashboard();
 
-                Swal.fire({
-                    title: 'Limpo!',
-                    text: 'Histórico foi limpo',
-                    icon: 'success',
-                    confirmButtonColor: '#ff6b35',
-                    background: '#1a1a1a',
-                    color: '#fff',
-                    timer: 2000,
-                    toast: true,
-                    position: 'top-end'
+                AlertHelper.toast('Limpo!', 'success', {
+                    text: 'Histórico foi limpo'
                 });
             }
         });
     }
 
     limparFavoritos() {
-        Swal.fire({
-            title: 'Limpar favoritos?',
-            text: 'Essa ação não pode ser desfeita',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ff6b35',
-            cancelButtonColor: '#666',
+        AlertHelper.confirm('Limpar favoritos?', 'Essa ação não pode ser desfeita', {
             confirmButtonText: 'Sim, limpar',
-            cancelButtonText: 'Cancelar',
-            background: '#1a1a1a',
-            color: '#fff'
+            cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
                 this.storage.limparFavoritos();
                 this.atualizarFavoritos();
                 this.atualizarDashboard();
 
-                Swal.fire({
-                    title: 'Limpo!',
-                    text: 'Favoritos foram limpos',
-                    icon: 'success',
-                    confirmButtonColor: '#ff6b35',
-                    background: '#1a1a1a',
-                    color: '#fff',
-                    timer: 2000,
-                    toast: true,
-                    position: 'top-end'
+                AlertHelper.toast('Limpo!', 'success', {
+                    text: 'Favoritos foram limpos'
                 });
             }
         });
@@ -420,18 +313,29 @@ class PhoenixApp {
         if (historico.length === 0) {
             historicoRecente.innerHTML = '<p class="text-white-50">Nenhuma conversão realizada ainda.</p>';
         } else {
-            historicoRecente.innerHTML = historico.slice(0, 3).map(item => `
-                <div class="d-flex align-items-center justify-content-between py-2 border-bottom border-secondary">
+            historicoRecente.innerHTML = '';
+            historico.slice(0, 3).forEach(item => {
+                const container = document.createElement('div');
+                container.className = 'd-flex align-items-center justify-content-between py-2 border-bottom border-secondary';
+                
+                container.innerHTML = `
                     <div class="d-flex align-items-center gap-2">
-                        <img src="${item.preview}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 0.25rem;">
+                        <img src="" style="width: 40px; height: 40px; object-fit: cover; border-radius: 0.25rem;" class="item-img">
                         <div>
-                            <p class="mb-0 text-white">${item.nome}</p>
-                            <small class="text-white-50">${item.data}</small>
+                            <p class="mb-0 text-white item-nome"></p>
+                            <small class="text-white-50 item-data"></small>
                         </div>
                     </div>
-                    <small class="text-danger">${item.tamanho}</small>
-                </div>
-            `).join('');
+                    <small class="text-danger item-tamanho"></small>
+                `;
+                
+                container.querySelector('.item-img').src = item.preview || '';
+                container.querySelector('.item-nome').textContent = item.nome;
+                container.querySelector('.item-data').textContent = item.data;
+                container.querySelector('.item-tamanho').textContent = item.tamanho;
+                
+                historicoRecente.appendChild(container);
+            });
         }
     }
 
@@ -444,27 +348,39 @@ class PhoenixApp {
             return;
         }
 
-        historicoList.innerHTML = historico.map(item => `
-            <div class="list-group-item">
+        historicoList.innerHTML = '';
+        historico.forEach(item => {
+            const container = document.createElement('div');
+            container.className = 'list-group-item';
+            
+            container.innerHTML = `
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center gap-3 flex-grow-1">
-                        <img src="${item.preview}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 0.5rem;">
+                        <img src="" style="width: 60px; height: 60px; object-fit: cover; border-radius: 0.5rem;" class="item-img">
                         <div class="flex-grow-1">
-                            <p class="mb-1 text-white fw-bold">${item.nome}</p>
-                            <small class="text-white-50">${item.tipo} • ${item.tamanho} • ${item.data}</small>
+                            <p class="mb-1 text-white fw-bold item-nome"></p>
+                            <small class="text-white-50 item-detalhes"></small>
                         </div>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-outline-danger" onclick="app.copiarDoHistorico('${item.id}')">
+                        <button class="btn btn-sm btn-outline-danger btn-copy">
                             <i class="bi bi-files"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="app.deletarHistorico(${item.id})">
+                        <button class="btn btn-sm btn-outline-danger btn-delete">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+            
+            container.querySelector('.item-img').src = item.preview || '';
+            container.querySelector('.item-nome').textContent = item.nome;
+            container.querySelector('.item-detalhes').textContent = `${item.tipo} • ${item.tamanho} • ${item.data}`;
+            container.querySelector('.btn-copy').onclick = () => this.copiarDoHistorico(item.id);
+            container.querySelector('.btn-delete').onclick = () => this.deletarHistorico(item.id);
+            
+            historicoList.appendChild(container);
+        });
     }
 
     atualizarFavoritos() {
@@ -476,27 +392,39 @@ class PhoenixApp {
             return;
         }
 
-        favoritosList.innerHTML = favoritos.map(item => `
-            <div class="list-group-item">
+        favoritosList.innerHTML = '';
+        favoritos.forEach(item => {
+            const container = document.createElement('div');
+            container.className = 'list-group-item';
+            
+            container.innerHTML = `
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center gap-3 flex-grow-1">
-                        <img src="${item.preview}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 0.5rem;">
+                        <img src="" style="width: 60px; height: 60px; object-fit: cover; border-radius: 0.5rem;" class="item-img">
                         <div class="flex-grow-1">
-                            <p class="mb-1 text-white fw-bold">${item.nome}</p>
-                            <small class="text-white-50">${item.tipo} • ${item.tamanho} • ${item.data}</small>
+                            <p class="mb-1 text-white fw-bold item-nome"></p>
+                            <small class="text-white-50 item-detalhes"></small>
                         </div>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-outline-danger" onclick="app.copiarDoFavorito('${item.id}')">
+                        <button class="btn btn-sm btn-outline-danger btn-copy">
                             <i class="bi bi-files"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="app.deletarFavorito(${item.id})">
+                        <button class="btn btn-sm btn-outline-danger btn-delete">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+            
+            container.querySelector('.item-img').src = item.preview || '';
+            container.querySelector('.item-nome').textContent = item.nome;
+            container.querySelector('.item-detalhes').textContent = `${item.tipo} • ${item.tamanho} • ${item.data}`;
+            container.querySelector('.btn-copy').onclick = () => this.copiarDoFavorito(item.id);
+            container.querySelector('.btn-delete').onclick = () => this.deletarFavorito(item.id);
+            
+            favoritosList.appendChild(container);
+        });
     }
 
     // ===== AUXILIARES =====
@@ -505,38 +433,30 @@ class PhoenixApp {
         const item = historico.find(h => h.id == id);
         if (item) {
             navigator.clipboard.writeText(item.base64).then(() => {
-                Swal.fire({
-                    title: 'Copiado!',
-                    text: 'Base64 copiado para a área de transferência',
-                    icon: 'success',
-                    confirmButtonColor: '#ff6b35',
-                    background: '#1a1a1a',
-                    color: '#fff',
-                    timer: 2000,
-                    toast: true,
-                    position: 'top-end'
+                AlertHelper.toast('Copiado!', 'success', {
+                    text: 'Base64 copiado para a área de transferência'
+                });
+            }).catch(() => {
+                AlertHelper.toast('Erro', 'error', {
+                    text: 'Falha ao copiar'
                 });
             });
         }
     }
 
     deletarHistorico(id) {
-        Swal.fire({
-            title: 'Deletar item?',
-            text: 'Essa ação não pode ser desfeita',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ff6b35',
-            cancelButtonColor: '#666',
+        AlertHelper.confirm('Deletar item?', 'Essa ação não pode ser desfeita', {
             confirmButtonText: 'Sim, deletar',
-            cancelButtonText: 'Cancelar',
-            background: '#1a1a1a',
-            color: '#fff'
+            cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
                 this.storage.deletarDoHistorico(id);
                 this.atualizarHistorico();
                 this.atualizarDashboard();
+
+                AlertHelper.toast('Deletado!', 'success', {
+                    text: 'Item removido do histórico'
+                });
             }
         });
     }
@@ -546,38 +466,30 @@ class PhoenixApp {
         const item = favoritos.find(f => f.id == id);
         if (item) {
             navigator.clipboard.writeText(item.base64).then(() => {
-                Swal.fire({
-                    title: 'Copiado!',
-                    text: 'Base64 copiado para a área de transferência',
-                    icon: 'success',
-                    confirmButtonColor: '#ff6b35',
-                    background: '#1a1a1a',
-                    color: '#fff',
-                    timer: 2000,
-                    toast: true,
-                    position: 'top-end'
+                AlertHelper.toast('Copiado!', 'success', {
+                    text: 'Base64 copiado para a área de transferência'
+                });
+            }).catch(() => {
+                AlertHelper.toast('Erro', 'error', {
+                    text: 'Falha ao copiar'
                 });
             });
         }
     }
 
     deletarFavorito(id) {
-        Swal.fire({
-            title: 'Deletar favorito?',
-            text: 'Essa ação não pode ser desfeita',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ff6b35',
-            cancelButtonColor: '#666',
+        AlertHelper.confirm('Deletar favorito?', 'Essa ação não pode ser desfeita', {
             confirmButtonText: 'Sim, deletar',
-            cancelButtonText: 'Cancelar',
-            background: '#1a1a1a',
-            color: '#fff'
+            cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
                 this.storage.deletarDosFavoritos(id);
                 this.atualizarFavoritos();
                 this.atualizarDashboard();
+
+                AlertHelper.toast('Deletado!', 'success', {
+                    text: 'Favorito removido'
+                });
             }
         });
     }
@@ -585,16 +497,9 @@ class PhoenixApp {
     // ===== BASE64 PARA IMAGEM =====
     converterBase64ParaImagem() {
         const base64Input = document.getElementById('base64Input').value.trim();
-        
+
         if (!base64Input) {
-            Swal.fire({
-                title: 'Campo vazio',
-                text: 'Cole o código Base64 para converter',
-                icon: 'warning',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
-            });
+            AlertHelper.warning('Campo vazio', 'Cole o código Base64 para converter');
             return;
         }
 
@@ -612,50 +517,28 @@ class PhoenixApp {
                 container.innerHTML = '';
                 container.appendChild(img);
                 document.getElementById('downloadImageBtn').disabled = false;
-                
-                Swal.fire({
-                    title: 'Sucesso!',
-                    text: 'Imagem convertida com sucesso',
-                    icon: 'success',
-                    confirmButtonColor: '#ff6b35',
-                    background: '#1a1a1a',
-                    color: '#fff',
-                    timer: 2000,
-                    toast: true,
-                    position: 'top-end'
+
+                AlertHelper.toast('Sucesso!', 'success', {
+                    text: 'Imagem convertida com sucesso'
                 });
             };
-            
+
             img.onerror = () => {
-                throw new Error('Código Base64 inválido');
+                AlertHelper.error('Erro na conversão', 'Verifique se o código Base64 está correto (inválido ou corrompido)');
             };
-            
+
             img.src = 'data:image/png;base64,' + base64Clean;
         } catch (error) {
-            Swal.fire({
-                title: 'Erro na conversão',
-                text: 'Verifique se o código Base64 está correto',
-                icon: 'error',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
-            });
+            AlertHelper.error('Erro na conversão', 'Verifique se o código Base64 está correto');
         }
     }
 
     downloadImagem() {
         const container = document.getElementById('base64PreviewContainer');
         const img = container.querySelector('img');
-        
+
         if (!img) {
-            Swal.fire({
-                title: 'Nenhuma imagem',
-                text: 'Converta um Base64 primeiro',
-                icon: 'warning',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
-            });
+            AlertHelper.warning('Nenhuma imagem', 'Converta um Base64 primeiro');
             return;
         }
 
@@ -664,16 +547,7 @@ class PhoenixApp {
         link.download = 'imagem_' + new Date().getTime() + '.png';
         link.click();
 
-        Swal.fire({
-            title: 'Download iniciado!',
-            icon: 'success',
-            confirmButtonColor: '#ff6b35',
-            background: '#1a1a1a',
-            color: '#fff',
-            timer: 2000,
-            toast: true,
-            position: 'top-end'
-        });
+        AlertHelper.toast('Download iniciado!', 'success');
     }
 
     limparBase64ParaImagem() {
@@ -685,114 +559,55 @@ class PhoenixApp {
     // ===== EDITOR DE TEXTO =====
     codificarTexto() {
         const textInput = document.getElementById('textInput').value;
-        
+
         if (!textInput) {
-            Swal.fire({
-                title: 'Campo vazio',
-                text: 'Digite algo para codificar',
-                icon: 'warning',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
-            });
+            AlertHelper.warning('Campo vazio', 'Digite algo para codificar');
             return;
         }
 
         try {
             const encoded = btoa(unescape(encodeURIComponent(textInput)));
             document.getElementById('textBase64Output').value = encoded;
-            
-            Swal.fire({
-                title: 'Codificado!',
-                text: 'Texto codificado com sucesso',
-                icon: 'success',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff',
-                timer: 2000,
-                toast: true,
-                position: 'top-end'
+
+            AlertHelper.toast('Codificado!', 'success', {
+                text: 'Texto codificado com sucesso'
             });
         } catch (error) {
-            Swal.fire({
-                title: 'Erro',
-                text: 'Erro ao codificar o texto',
-                icon: 'error',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
-            });
+            AlertHelper.error('Erro', 'Erro ao codificar o texto');
         }
     }
 
     decodificarTexto() {
         const textBase64 = document.getElementById('textBase64Output').value.trim();
-        
+
         if (!textBase64) {
-            Swal.fire({
-                title: 'Campo vazio',
-                text: 'Cole um Base64 para decodificar',
-                icon: 'warning',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
-            });
+            AlertHelper.warning('Campo vazio', 'Cole um Base64 para decodificar');
             return;
         }
 
         try {
             const decoded = decodeURIComponent(escape(atob(textBase64)));
             document.getElementById('textInput').value = decoded;
-            
-            Swal.fire({
-                title: 'Decodificado!',
-                text: 'Texto decodificado com sucesso',
-                icon: 'success',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff',
-                timer: 2000,
-                toast: true,
-                position: 'top-end'
+
+            AlertHelper.toast('Decodificado!', 'success', {
+                text: 'Texto decodificado com sucesso'
             });
         } catch (error) {
-            Swal.fire({
-                title: 'Erro',
-                text: 'Base64 inválido ou não pode ser decodificado',
-                icon: 'error',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
-            });
+            AlertHelper.error('Erro', 'Base64 inválido ou não pode ser decodificado');
         }
     }
 
     copiarTexto() {
         const textBase64 = document.getElementById('textBase64Output').value;
-        
+
         if (!textBase64) {
-            Swal.fire({
-                title: 'Nada para copiar',
-                text: 'Codifique um texto primeiro',
-                icon: 'warning',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
-            });
+            AlertHelper.warning('Nada para copiar', 'Codifique um texto primeiro');
             return;
         }
 
         navigator.clipboard.writeText(textBase64).then(() => {
-            Swal.fire({
-                title: 'Copiado!',
-                text: 'Texto Base64 copiado para área de transferência',
-                icon: 'success',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff',
-                timer: 2000,
-                toast: true,
-                position: 'top-end'
+            AlertHelper.toast('Copiado!', 'success', {
+                text: 'Texto Base64 copiado para área de transferência'
             });
         });
     }

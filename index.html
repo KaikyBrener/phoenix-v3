@@ -84,7 +84,12 @@
                         <div class="col-12 dashboard-hero">
                             <p class="hero-kicker text-danger text-uppercase fw-semibold mb-2">Dashboard</p>
                             <h2 class="text-white mb-2 dashboard-title">Bem-vindo ao <span class="text-danger phoenix-title-glow">PHOENIX V2</span></h2>
-                            <p class="text-white-50 dashboard-subtitle">Converta suas imagens para Base64 de forma rápida, segura e eficiente.</p>
+                            <p class="text-white-50 dashboard-subtitle mb-4">Converta suas imagens para Base64 de forma rápida, segura e eficiente.</p>
+                            
+                            <div class="d-inline-flex align-items-center px-3 py-2 rounded-pill" style="background: rgba(47, 191, 111, 0.1); border: 1px solid rgba(47, 191, 111, 0.3);">
+                                <i class="bi bi-shield-check text-success me-2"></i>
+                                <span class="text-success" style="font-size: 0.85rem; font-weight: 500;">LGPD: 100% Offline. Suas imagens nunca são enviadas para a nuvem.</span>
+                            </div>
                         </div>
                     </div>
 
@@ -186,8 +191,14 @@
                                     <div class="upload-area border-2 border-dashed border-danger rounded p-5 text-center cursor-pointer" id="uploadArea">
                                         <i class="bi bi-cloud-arrow-up text-danger fs-1 mb-3 d-block"></i>
                                         <p class="text-white mb-2">Arraste sua imagem aqui ou clique para selecionar</p>
-                                        <small class="text-white-50 d-block mb-3">Suporte: PNG, JPG, JPEG, WEBP</small>
-                                        <small class="text-white-50 d-block">Tamanho máximo: 10MB</small>
+                                        <small class="text-white-50 d-block mb-3">Suporte: PNG, JPG, JPEG, WEBP, GIF</small>
+                                        <small class="text-white-50 d-block">Tamanho máximo: 3MB</small>
+                                        
+                                        <div class="mt-4 pt-3 border-top border-secondary opacity-75">
+                                            <small class="text-success d-block fw-medium">
+                                                <i class="bi bi-lock-fill me-1"></i> 100% Offline e Privado
+                                            </small>
+                                        </div>
                                         <input type="file" id="imageInput" accept="image/*" style="display: none;">
                                     </div>
                                 </div>
@@ -421,7 +432,7 @@
                                     </h5>
                                 </div>
                                 <div class="card-body">
-                                    <textarea class="form-control bg-darker text-white border-secondary" id="textBase64Output" rows="10" placeholder="O texto codificado aparecerá aqui..." readonly></textarea>
+                                    <textarea class="form-control bg-darker text-white border-secondary" id="textBase64Output" rows="10" placeholder="O texto codificado aparecerá aqui, ou cole um Base64 para decodificar..."></textarea>
                                 </div>
                             </div>
                         </div>
