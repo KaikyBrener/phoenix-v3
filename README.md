@@ -1,27 +1,56 @@
-# 🔥 PHOENIX V1 - Conversor de Imagem para Base64
+# Phoenix
 
-Um aplicativo web moderno e responsivo para converter imagens em Base64, com histórico local e favoritos, sem necessidade de back-end ou banco de dados.
+Conversor de imagens para Base64 com histórico local.
 
-## ✨ Características
+## Como usar
 
-- ✅ **Upload de Imagem** - Arraste ou clique para selecionar
-- ✅ **Pré-visualização** - Visualize a imagem antes de converter
-- ✅ **Conversão Base64** - Rápida e segura no navegador
-- ✅ **Cópia Rápida** - Copie o Base64 com um clique
-- ✅ **Download** - Baixe o Base64 em arquivo .txt
-- ✅ **Histórico Local** - Salvo no localStorage
-- ✅ **Favoritos** - Marque conversões importantes
-- ✅ **Dashboard** - Estatísticas em tempo real
-- ✅ **Responsivo** - Funciona em desktop, tablet e celular
-- ✅ **Tema Escuro** - Interface moderna em tons de cinza e laranja
+1. Abrir `index.html` no navegador
+2. Selecionar uma imagem (PNG, JPG, JPEG, WEBP)
+3. O Base64 aparece automaticamente
+4. Clicar em "Copiar" ou "Baixar"
 
-## 🛠️ Tecnologias
+O histórico salva automaticamente em localStorage.
 
-- **HTML5** - Estrutura semântica
-- **CSS3** - Estilos avançados com variáveis CSS
-- **JavaScript Vanilla** - Sem dependências externas (a não ser CDN)
-- **Bootstrap 5** - Framework responsivo
-- **SweetAlert2** - Alertas bonitos
-- **LocalStorage** - Persistência de dados
+## O que faz
 
-## 📁 Estrutura de Pastas
+- Converter imagem → Base64
+- Converter Base64 → Imagem
+- Codificar/decodificar texto em Base64
+- Guardar histórico (últimas 100 conversões)
+- Gerenciar favoritos
+
+## Estrutura
+
+```
+js/
+├── storage.js     - Salva/carrega do localStorage
+├── conversor.js   - Valida e converte arquivos
+└── main.js        - Gerencia UI e eventos
+
+index.html         - Página principal
+css/css_style.css  - Estilos (tema escuro)
+```
+
+## Rodando localmente
+
+Não precisa build. É só servir os arquivos:
+
+```bash
+# Python
+python3 -m http.server 8000
+
+# Node
+npx http-server
+```
+
+Depois abrir `http://localhost:8000`
+
+## Limitações
+
+- localStorage tem limite (~5-10 MB)
+- Arquivos acima de 10 MB são rejeitados
+- localStorage pode não funcionar em navegação privada (alguns navegadores)
+
+## Browsers
+
+Chrome, Firefox, Safari, Edge (últimas versões)

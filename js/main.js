@@ -1,6 +1,9 @@
-// App Main - Controla toda a aplicação
+/**
+ * Aplicação Phoenix
+ * Controlador principal gerenciando interações de UI e estado da aplicação
+ */
 
-class PhoenixApp {
+class Phoenix {
     constructor() {
         this.converter = converter;
         this.storage = storage;
@@ -8,62 +11,70 @@ class PhoenixApp {
     }
 
     init() {
-        this.setupEventListeners();
+        this.anexarListeners();
         this.atualizarDashboard();
     }
 
-    // ===== EVENT LISTENERS =====
-    setupEventListeners() {
-        // Navegação (Abas principais)
+    // Anexação de listeners de eventos
+    anexarListeners() {
+        // Navegação por abas
         document.querySelectorAll('[data-tab]').forEach(btn => {
-            btn.addEventListener('click', (e) => this.mudarAba(e.target.closest('[data-tab]').dataset.tab));
+            btn.addEventListener('click', (e) => {
+                const abaId = e.target.closest('[data-tab]').dataset.tab;
+                this.mudarAba(abaId);
+            });
         });
 
-        // Ferramentas
+        // Navegação por ferramentas
         document.querySelectorAll('[data-tool]').forEach(btn => {
-            btn.addEventListener('click', (e) => this.mudarAba(e.target.closest('[data-tool]').dataset.tool));
+            btn.addEventListener('click', (e) => {
+                const ferramenta = e.target.closest('[data-tool]').dataset.tool;
+                this.mudarAba(ferramenta);
+            });
         });
 
-        // Upload
-        const uploadArea = document.getElementById('uploadArea');
-        const imageInput = document.getElementById('imageInput');
+        // Upload de arquivo
+        const areaUpload = document.getElementById('uploadArea');
+        const inputArquivo = document.getElementById('imageInput');
 
-        uploadArea.addEventListener('click', () => imageInput.click());
-        uploadArea.addEventListener('dragover', (e) => {
+        areaUpload.addEventListener('click', () => inputArquivo.click());
+        areaUpload.addEventListener('dragover', (e) => {
             e.preventDefault();
-            uploadArea.classList.add('dragover');
+            areaUpload.classList.add('dragover');
         });
-        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
-        uploadArea.addEventListener('drop', (e) => {
+        areaUpload.addEventListener('dragleave', () => areaUpload.classList.remove('dragover'));
+        areaUpload.addEventListener('drop', (e) => {
             e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            this.processarArquivo(e.dataTransfer.files[0]);
+            areaUpload.classList.remove('dragover');
+            if (e.dataTransfer.files[0]) {
+                this.processarArquivo(e.dataTransfer.files[0]);
+            }
         });
 
-        imageInput.addEventListener('change', (e) => {
+        inputArquivo.addEventListener('change', (e) => {
             if (e.target.files[0]) {
                 this.processarArquivo(e.target.files[0]);
             }
         });
 
-        // Botões de ação
+        // Ações de conversão de imagem
         document.getElementById('copyBtn').addEventListener('click', () => this.copiarBase64());
         document.getElementById('downloadBtn').addEventListener('click', () => this.downloadBase64());
         document.getElementById('addFavoriteBtn').addEventListener('click', () => this.adicionarAosFavoritos());
         document.getElementById('limparBtn').addEventListener('click', () => this.limparConversor());
 
-        // Histórico e Favoritos
+        // Histórico e favoritos
         document.getElementById('limparHistoricoBtn').addEventListener('click', () => this.limparHistorico());
         document.getElementById('limparFavoritosBtn').addEventListener('click', () => this.limparFavoritos());
 
-        // Base64 para Imagem
+        // Base64 para imagem
         if (document.getElementById('converterBtn')) {
             document.getElementById('converterBtn').addEventListener('click', () => this.converterBase64ParaImagem());
             document.getElementById('downloadImageBtn').addEventListener('click', () => this.downloadImagem());
-            document.getElementById('limparBase64Btn').addEventListener('click', () => this.limparBase64ParaImagem());
+            document.getElementById('limparBase64Btn').addEventListener('click', () => this.limparBase64());
         }
 
-        // Editor de Texto
+        // Codificação de texto
         if (document.getElementById('codificarTextBtn')) {
             document.getElementById('codificarTextBtn').addEventListener('click', () => this.codificarTexto());
             document.getElementById('decodificarTextBtn').addEventListener('click', () => this.decodificarTexto());
@@ -72,48 +83,26 @@ class PhoenixApp {
         }
     }
 
-    // ===== PROCESSAMENTO DE ARQUIVO =====
-    async processarArquivo(file) {
-        if (!file) return;
-
-        // Validar
-        const validacao = this.converter.validarImagem(file);
+    // Processamento de arquivos
+    async processarArquivo(arquivo) {
+        const validacao = this.converter.validar(arquivo);
         if (!validacao.valido) {
-            Swal.fire({
+            this.exibirAlerta({
                 title: 'Erro na validação',
                 text: validacao.erro,
-                icon: 'error',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
+                icon: 'error'
             });
             return;
         }
 
         try {
-            // Mostrar loading
-            Swal.fire({
-                title: 'Processando...',
-                text: 'Convertendo imagem para Base64',
-                icon: 'info',
-                allowOutsideClick: false,
-                didOpen: (modal) => {
-                    Swal.showLoading();
-                },
-                background: '#1a1a1a',
-                color: '#fff'
-            });
+            this.exibirCarregamento('Convertendo imagem para Base64...');
 
-            // Converter
-            const { base64, metadados } = await this.converter.converterParaBase64(file);
+            const { base64, metadados } = await this.converter.converterParaBase64(arquivo);
+            const preview = await this.converter.gerarPreview(arquivo);
 
-            // Gerar preview
-            const preview = await this.converter.gerarPreview(file);
-
-            // Exibir resultado
             this.exibirResultado(base64, metadados, preview);
 
-            // Salvar no histórico
             this.storage.adicionarAoHistorico({
                 nome: metadados.nome,
                 tipo: metadados.tipo,
@@ -122,108 +111,83 @@ class PhoenixApp {
                 preview: preview.url
             });
 
-            // Fechar loading
             Swal.close();
-
-            // Mostrar sucesso
-            Swal.fire({
+            this.exibirAlerta({
                 title: 'Sucesso!',
                 text: 'Imagem convertida com sucesso',
                 icon: 'success',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff',
                 timer: 2000
             });
 
         } catch (erro) {
-            Swal.fire({
+            this.exibirAlerta({
                 title: 'Erro ao processar',
                 text: erro.message,
-                icon: 'error',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
+                icon: 'error'
             });
         }
     }
 
-    // ===== EXIBIÇÃO DE RESULTADOS =====
     exibirResultado(base64, metadados, preview) {
-        // Textarea com Base64
-        const base64Output = document.getElementById('base64Output');
-        base64Output.value = base64;
+        document.getElementById('base64Output').value = base64;
 
-        // Preview
-        const previewContainer = document.getElementById('previewContainer');
-        previewContainer.innerHTML = `
+        const containerPreview = document.getElementById('previewContainer');
+        containerPreview.innerHTML = `
             <img src="${preview.url}" style="max-width: 100%; max-height: 300px; border-radius: 0.5rem;" alt="Preview">
         `;
 
-        // Informações
         document.getElementById('imageName').textContent = metadados.nome;
         document.getElementById('imageType').textContent = metadados.tipo;
         document.getElementById('imageSize').textContent = metadados.tamanho;
         document.getElementById('imageInfo').style.display = 'block';
 
-        // Estatísticas
         document.getElementById('tamanhoImagem').textContent = metadados.tamanho;
-        document.getElementById('tamanhoBase64').textContent = this.converter.calcularTamanhoReduzido(this.converter.obterImagemAtual());
-        document.getElementById('proporcao').textContent = this.converter.calcularProporção(this.converter.obterImagemAtual());
+        document.getElementById('tamanhoBase64').textContent = this.converter.obterTamanhoBase64(this.converter.obterImagemAtual());
+        document.getElementById('proporcao').textContent = this.converter.obterProporacao(this.converter.obterImagemAtual());
 
-        // Habilitar botões
-        document.getElementById('copyBtn').disabled = false;
-        document.getElementById('downloadBtn').disabled = false;
-        document.getElementById('addFavoriteBtn').disabled = false;
+        // Habilitar botões de ação
+        ['copyBtn', 'downloadBtn', 'addFavoriteBtn'].forEach(id => {
+            document.getElementById(id).disabled = false;
+        });
     }
 
-    // ===== AÇÕES =====
     copiarBase64() {
-        const base64Output = document.getElementById('base64Output');
-        navigator.clipboard.writeText(base64Output.value).then(() => {
-            Swal.fire({
+        const conteudo = document.getElementById('base64Output').value;
+        navigator.clipboard.writeText(conteudo).then(() => {
+            this.exibirAlerta({
                 title: 'Copiado!',
-                text: 'Base64 copiado para a área de transferência',
+                text: 'Base64 copiado para área de transferência',
                 icon: 'success',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff',
                 timer: 2000,
                 toast: true,
                 position: 'top-end'
             });
         }).catch(() => {
-            Swal.fire({
+            this.exibirAlerta({
                 title: 'Erro',
                 text: 'Falha ao copiar',
-                icon: 'error',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
+                icon: 'error'
             });
         });
     }
 
     downloadBase64() {
-        const base64Output = document.getElementById('base64Output').value;
+        const conteudo = document.getElementById('base64Output').value;
         const metadados = this.converter.obterMetadadosAtual();
 
-        const element = document.createElement('a');
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(base64Output));
-        element.setAttribute('download', `${metadados.nome}_base64.txt`);
-        element.style.display = 'none';
+        const link = document.createElement('a');
+        link.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(conteudo));
+        link.setAttribute('download', `${metadados.nome}_base64.txt`);
+        link.style.display = 'none';
 
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
 
-        Swal.fire({
+        this.exibirAlerta({
             title: 'Download iniciado!',
             text: 'Arquivo salvo com sucesso',
             icon: 'success',
-            confirmButtonColor: '#ff6b35',
-            background: '#1a1a1a',
-            color: '#fff',
             timer: 2000,
             toast: true,
             position: 'top-end'
@@ -242,13 +206,10 @@ class PhoenixApp {
             preview: document.querySelector('#previewContainer img')?.src || ''
         });
 
-        Swal.fire({
+        this.exibirAlerta({
             title: resultado.sucesso ? 'Adicionado!' : 'Aviso',
             text: resultado.mensagem,
             icon: resultado.sucesso ? 'success' : 'warning',
-            confirmButtonColor: '#ff6b35',
-            background: '#1a1a1a',
-            color: '#fff',
             timer: 2000,
             toast: true,
             position: 'top-end'
@@ -260,159 +221,114 @@ class PhoenixApp {
     }
 
     limparConversor() {
-        Swal.fire({
-            title: 'Limpar tudo?',
-            text: 'Isso vai limpar a imagem, preview e Base64',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ff6b35',
-            cancelButtonColor: '#666',
-            confirmButtonText: 'Sim, limpar',
-            cancelButtonText: 'Cancelar',
-            background: '#1a1a1a',
-            color: '#fff'
-        }).then((result) => {
-            if (result.isConfirmed) {
+        this.confirmarAcao(
+            'Limpar tudo?',
+            'Isso vai limpar a imagem, preview e Base64',
+            () => {
                 this.converter.limpar();
                 document.getElementById('base64Output').value = '';
                 document.getElementById('previewContainer').innerHTML = '<p class="text-white-50">Sua imagem aparecerá aqui</p>';
                 document.getElementById('imageInfo').style.display = 'none';
-                document.getElementById('copyBtn').disabled = true;
-                document.getElementById('downloadBtn').disabled = true;
-                document.getElementById('addFavoriteBtn').disabled = true;
+
+                ['copyBtn', 'downloadBtn', 'addFavoriteBtn'].forEach(id => {
+                    document.getElementById(id).disabled = true;
+                });
+
                 document.getElementById('tamanhoImagem').textContent = '-';
                 document.getElementById('tamanhoBase64').textContent = '-';
                 document.getElementById('proporcao').textContent = '-';
 
-                Swal.fire({
+                this.exibirAlerta({
                     title: 'Limpo!',
                     text: 'Tudo foi limpo com sucesso',
                     icon: 'success',
-                    confirmButtonColor: '#ff6b35',
-                    background: '#1a1a1a',
-                    color: '#fff',
                     timer: 2000
                 });
             }
-        });
+        );
     }
 
     limparHistorico() {
-        Swal.fire({
-            title: 'Limpar histórico?',
-            text: 'Essa ação não pode ser desfeita',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ff6b35',
-            cancelButtonColor: '#666',
-            confirmButtonText: 'Sim, limpar',
-            cancelButtonText: 'Cancelar',
-            background: '#1a1a1a',
-            color: '#fff'
-        }).then((result) => {
-            if (result.isConfirmed) {
+        this.confirmarAcao(
+            'Limpar histórico?',
+            'Essa ação não pode ser desfeita',
+            () => {
                 this.storage.limparHistorico();
                 this.atualizarHistorico();
                 this.atualizarDashboard();
 
-                Swal.fire({
+                this.exibirAlerta({
                     title: 'Limpo!',
                     text: 'Histórico foi limpo',
                     icon: 'success',
-                    confirmButtonColor: '#ff6b35',
-                    background: '#1a1a1a',
-                    color: '#fff',
                     timer: 2000
                 });
             }
-        });
+        );
     }
 
     limparFavoritos() {
-        Swal.fire({
-            title: 'Limpar favoritos?',
-            text: 'Essa ação não pode ser desfeita',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ff6b35',
-            cancelButtonColor: '#666',
-            confirmButtonText: 'Sim, limpar',
-            cancelButtonText: 'Cancelar',
-            background: '#1a1a1a',
-            color: '#fff'
-        }).then((result) => {
-            if (result.isConfirmed) {
+        this.confirmarAcao(
+            'Limpar favoritos?',
+            'Essa ação não pode ser desfeita',
+            () => {
                 this.storage.limparFavoritos();
                 this.atualizarFavoritos();
                 this.atualizarDashboard();
 
-                Swal.fire({
+                this.exibirAlerta({
                     title: 'Limpo!',
                     text: 'Favoritos foram limpos',
                     icon: 'success',
-                    confirmButtonColor: '#ff6b35',
-                    background: '#1a1a1a',
-                    color: '#fff',
                     timer: 2000
                 });
             }
-        });
+        );
     }
 
-    // ===== ABAS =====
     mudarAba(abaId) {
-        // Redirecionar imagem-base64 para conversor
+        // Redirecionar atalho de ferramenta para aba real
         if (abaId === 'imagem-base64') {
             abaId = 'conversor';
         }
 
-        // Ocultar todas
         document.querySelectorAll('.tab-content').forEach(tab => {
             tab.style.display = 'none';
         });
 
-        // Remover ativo dos botões
         document.querySelectorAll('[data-tab], [data-tool]').forEach(btn => {
             btn.classList.remove('active');
         });
 
-        // Mostrar aba selecionada
-        const tabElement = document.getElementById(abaId);
-        if (tabElement) {
-            tabElement.style.display = 'block';
-        }
-        
-        // Marcar botão como ativo (procura em data-tab ou data-tool)
-        const activeBtn = document.querySelector(`[data-tab="${abaId}"], [data-tool="${abaId}"]`);
-        if (activeBtn) {
-            activeBtn.classList.add('active');
+        const aba = document.getElementById(abaId);
+        if (aba) {
+            aba.style.display = 'block';
         }
 
-        // Atualizar conteúdo se necessário
-        if (abaId === 'historico') {
-            this.atualizarHistorico();
-        } else if (abaId === 'favoritos') {
-            this.atualizarFavoritos();
-        } else if (abaId === 'dashboard') {
-            this.atualizarDashboard();
+        const btnAtivo = document.querySelector(`[data-tab="${abaId}"], [data-tool="${abaId}"]`);
+        if (btnAtivo) {
+            btnAtivo.classList.add('active');
         }
+
+        // Atualizar conteúdo baseado na aba
+        if (abaId === 'historico') this.atualizarHistorico();
+        else if (abaId === 'favoritos') this.atualizarFavoritos();
+        else if (abaId === 'dashboard') this.atualizarDashboard();
     }
 
-    // ===== ATUALIZAR CONTEÚDO =====
     atualizarDashboard() {
         const stats = this.storage.obterStats();
         const historico = this.storage.obterHistorico();
 
-        document.getElementById('conversoes-hoje').textContent = stats.conversioesHoje;
+        document.getElementById('conversoes-hoje').textContent = stats.conversoesHoje;
         document.getElementById('imagens-processadas').textContent = stats.totalConversoes;
         document.getElementById('favoritos-count').textContent = stats.totalFavoritos;
 
-        // Histórico recente
-        const historicoRecente = document.getElementById('historico-recente');
+        const containerRecente = document.getElementById('historico-recente');
         if (historico.length === 0) {
-            historicoRecente.innerHTML = '<p class="text-white-50">Nenhuma conversão realizada ainda.</p>';
+            containerRecente.innerHTML = '<p class="text-white-50">Nenhuma conversão realizada ainda.</p>';
         } else {
-            historicoRecente.innerHTML = historico.slice(0, 3).map(item => `
+            containerRecente.innerHTML = historico.slice(0, 3).map(item => `
                 <div class="d-flex align-items-center justify-content-between py-2 border-bottom border-secondary">
                     <div class="d-flex align-items-center gap-2">
                         <img src="${item.preview}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 0.25rem;">
@@ -429,14 +345,14 @@ class PhoenixApp {
 
     atualizarHistorico() {
         const historico = this.storage.obterHistorico();
-        const historicoList = document.getElementById('historicoList');
+        const container = document.getElementById('historicoList');
 
         if (historico.length === 0) {
-            historicoList.innerHTML = '<p class="text-white-50 py-4">Nenhuma conversão no histórico ainda.</p>';
+            container.innerHTML = '<p class="text-white-50 py-4">Nenhuma conversão no histórico ainda.</p>';
             return;
         }
 
-        historicoList.innerHTML = historico.map(item => `
+        container.innerHTML = historico.map(item => `
             <div class="list-group-item">
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center gap-3 flex-grow-1">
@@ -450,7 +366,7 @@ class PhoenixApp {
                         <button class="btn btn-sm btn-outline-danger" onclick="app.copiarDoHistorico('${item.id}')">
                             <i class="bi bi-files"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="app.deletarHistorico(${item.id})">
+                        <button class="btn btn-sm btn-outline-danger" onclick="app.deletarDoHistorico(${item.id})">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
@@ -461,14 +377,14 @@ class PhoenixApp {
 
     atualizarFavoritos() {
         const favoritos = this.storage.obterFavoritos();
-        const favoritosList = document.getElementById('favoritosList');
+        const container = document.getElementById('favoritosList');
 
         if (favoritos.length === 0) {
-            favoritosList.innerHTML = '<p class="text-white-50 py-4">Nenhum favorito salvo ainda.</p>';
+            container.innerHTML = '<p class="text-white-50 py-4">Nenhum favorito salvo ainda.</p>';
             return;
         }
 
-        favoritosList.innerHTML = favoritos.map(item => `
+        container.innerHTML = favoritos.map(item => `
             <div class="list-group-item">
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center gap-3 flex-grow-1">
@@ -482,7 +398,7 @@ class PhoenixApp {
                         <button class="btn btn-sm btn-outline-danger" onclick="app.copiarDoFavorito('${item.id}')">
                             <i class="bi bi-files"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="app.deletarFavorito(${item.id})">
+                        <button class="btn btn-sm btn-outline-danger" onclick="app.deletarDoFavorito(${item.id})">
                             <i class="bi bi-trash"></i>
                         </button>
                     </div>
@@ -491,19 +407,14 @@ class PhoenixApp {
         `).join('');
     }
 
-    // ===== AUXILIARES =====
     copiarDoHistorico(id) {
-        const historico = this.storage.obterHistorico();
-        const item = historico.find(h => h.id == id);
+        const item = this.storage.obterHistorico().find(h => h.id == id);
         if (item) {
             navigator.clipboard.writeText(item.base64).then(() => {
-                Swal.fire({
+                this.exibirAlerta({
                     title: 'Copiado!',
-                    text: 'Base64 copiado para a área de transferência',
+                    text: 'Base64 copiado para área de transferência',
                     icon: 'success',
-                    confirmButtonColor: '#ff6b35',
-                    background: '#1a1a1a',
-                    color: '#fff',
                     timer: 2000,
                     toast: true,
                     position: 'top-end'
@@ -512,39 +423,26 @@ class PhoenixApp {
         }
     }
 
-    deletarHistorico(id) {
-        Swal.fire({
-            title: 'Deletar item?',
-            text: 'Essa ação não pode ser desfeita',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ff6b35',
-            cancelButtonColor: '#666',
-            confirmButtonText: 'Sim, deletar',
-            cancelButtonText: 'Cancelar',
-            background: '#1a1a1a',
-            color: '#fff'
-        }).then((result) => {
-            if (result.isConfirmed) {
+    deletarDoHistorico(id) {
+        this.confirmarAcao(
+            'Deletar item?',
+            'Essa ação não pode ser desfeita',
+            () => {
                 this.storage.deletarDoHistorico(id);
                 this.atualizarHistorico();
                 this.atualizarDashboard();
             }
-        });
+        );
     }
 
     copiarDoFavorito(id) {
-        const favoritos = this.storage.obterFavoritos();
-        const item = favoritos.find(f => f.id == id);
+        const item = this.storage.obterFavoritos().find(f => f.id == id);
         if (item) {
             navigator.clipboard.writeText(item.base64).then(() => {
-                Swal.fire({
+                this.exibirAlerta({
                     title: 'Copiado!',
-                    text: 'Base64 copiado para a área de transferência',
+                    text: 'Base64 copiado para área de transferência',
                     icon: 'success',
-                    confirmButtonColor: '#ff6b35',
-                    background: '#1a1a1a',
-                    color: '#fff',
                     timer: 2000,
                     toast: true,
                     position: 'top-end'
@@ -553,84 +451,64 @@ class PhoenixApp {
         }
     }
 
-    deletarFavorito(id) {
-        Swal.fire({
-            title: 'Deletar favorito?',
-            text: 'Essa ação não pode ser desfeita',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ff6b35',
-            cancelButtonColor: '#666',
-            confirmButtonText: 'Sim, deletar',
-            cancelButtonText: 'Cancelar',
-            background: '#1a1a1a',
-            color: '#fff'
-        }).then((result) => {
-            if (result.isConfirmed) {
+    deletarDoFavorito(id) {
+        this.confirmarAcao(
+            'Deletar favorito?',
+            'Essa ação não pode ser desfeita',
+            () => {
                 this.storage.deletarDosFavoritos(id);
                 this.atualizarFavoritos();
                 this.atualizarDashboard();
             }
-        });
+        );
     }
 
-    // ===== BASE64 PARA IMAGEM =====
+    // Conversão de Base64 para imagem
     converterBase64ParaImagem() {
-        const base64Input = document.getElementById('base64Input').value.trim();
-        
-        if (!base64Input) {
-            Swal.fire({
+        const input = document.getElementById('base64Input').value.trim();
+
+        if (!input) {
+            this.exibirAlerta({
                 title: 'Campo vazio',
                 text: 'Cole o código Base64 para converter',
-                icon: 'warning',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
+                icon: 'warning'
             });
             return;
         }
 
         try {
-            // Remove data URL prefix se existir
-            let base64Clean = base64Input;
-            if (base64Input.includes(',')) {
-                base64Clean = base64Input.split(',')[1];
+            let base64 = input;
+            if (input.includes(',')) {
+                base64 = input.split(',')[1];
             }
 
-            // Criar imagem
             const img = new Image();
             img.onload = () => {
                 const container = document.getElementById('base64PreviewContainer');
                 container.innerHTML = '';
                 container.appendChild(img);
                 document.getElementById('downloadImageBtn').disabled = false;
-                
-                Swal.fire({
+
+                this.exibirAlerta({
                     title: 'Sucesso!',
                     text: 'Imagem convertida com sucesso',
                     icon: 'success',
-                    confirmButtonColor: '#ff6b35',
-                    background: '#1a1a1a',
-                    color: '#fff',
                     timer: 2000,
                     toast: true,
                     position: 'top-end'
                 });
             };
-            
+
             img.onerror = () => {
                 throw new Error('Código Base64 inválido');
             };
-            
-            img.src = 'data:image/png;base64,' + base64Clean;
-        } catch (error) {
-            Swal.fire({
+
+            img.src = 'data:image/png;base64,' + base64;
+        } catch (erro) {
+            this.exibirAlerta({
                 title: 'Erro na conversão',
                 text: 'Verifique se o código Base64 está correto',
-                icon: 'error',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
+                icon: 'error'
             });
         }
     }
@@ -638,15 +516,12 @@ class PhoenixApp {
     downloadImagem() {
         const container = document.getElementById('base64PreviewContainer');
         const img = container.querySelector('img');
-        
+
         if (!img) {
-            Swal.fire({
+            this.exibirAlerta({
                 title: 'Nenhuma imagem',
                 text: 'Converta um Base64 primeiro',
-                icon: 'warning',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
+                icon: 'warning'
             });
             return;
         }
@@ -656,132 +531,105 @@ class PhoenixApp {
         link.download = 'imagem_' + new Date().getTime() + '.png';
         link.click();
 
-        Swal.fire({
+        this.exibirAlerta({
             title: 'Download iniciado!',
             icon: 'success',
-            confirmButtonColor: '#ff6b35',
-            background: '#1a1a1a',
-            color: '#fff',
             timer: 2000,
             toast: true,
             position: 'top-end'
         });
     }
 
-    limparBase64ParaImagem() {
+    limparBase64() {
         document.getElementById('base64Input').value = '';
         document.getElementById('base64PreviewContainer').innerHTML = '<p class="text-white-50">A imagem aparecerá aqui</p>';
         document.getElementById('downloadImageBtn').disabled = true;
     }
 
-    // ===== EDITOR DE TEXTO =====
+    // Codificação de texto
     codificarTexto() {
-        const textInput = document.getElementById('textInput').value;
-        
-        if (!textInput) {
-            Swal.fire({
+        const input = document.getElementById('textInput').value;
+
+        if (!input) {
+            this.exibirAlerta({
                 title: 'Campo vazio',
                 text: 'Digite algo para codificar',
-                icon: 'warning',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
+                icon: 'warning'
             });
             return;
         }
 
         try {
-            const encoded = btoa(unescape(encodeURIComponent(textInput)));
-            document.getElementById('textBase64Output').value = encoded;
-            
-            Swal.fire({
+            const codificado = btoa(unescape(encodeURIComponent(input)));
+            document.getElementById('textBase64Output').value = codificado;
+
+            this.exibirAlerta({
                 title: 'Codificado!',
                 text: 'Texto codificado com sucesso',
                 icon: 'success',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff',
                 timer: 2000,
                 toast: true,
                 position: 'top-end'
             });
-        } catch (error) {
-            Swal.fire({
+        } catch (erro) {
+            this.exibirAlerta({
                 title: 'Erro',
                 text: 'Erro ao codificar o texto',
-                icon: 'error',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
+                icon: 'error'
             });
         }
     }
 
     decodificarTexto() {
-        const textBase64 = document.getElementById('textBase64Output').value.trim();
-        
-        if (!textBase64) {
-            Swal.fire({
+        const input = document.getElementById('textBase64Output').value.trim();
+
+        if (!input) {
+            this.exibirAlerta({
                 title: 'Campo vazio',
                 text: 'Cole um Base64 para decodificar',
-                icon: 'warning',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
+                icon: 'warning'
             });
             return;
         }
 
         try {
-            const decoded = decodeURIComponent(escape(atob(textBase64)));
-            document.getElementById('textInput').value = decoded;
-            
-            Swal.fire({
+            const decodificado = decodeURIComponent(escape(atob(input)));
+            document.getElementById('textInput').value = decodificado;
+
+            this.exibirAlerta({
                 title: 'Decodificado!',
                 text: 'Texto decodificado com sucesso',
                 icon: 'success',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff',
                 timer: 2000,
                 toast: true,
                 position: 'top-end'
             });
-        } catch (error) {
-            Swal.fire({
+        } catch (erro) {
+            this.exibirAlerta({
                 title: 'Erro',
                 text: 'Base64 inválido ou não pode ser decodificado',
-                icon: 'error',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
+                icon: 'error'
             });
         }
     }
 
     copiarTexto() {
-        const textBase64 = document.getElementById('textBase64Output').value;
-        
-        if (!textBase64) {
-            Swal.fire({
+        const conteudo = document.getElementById('textBase64Output').value;
+
+        if (!conteudo) {
+            this.exibirAlerta({
                 title: 'Nada para copiar',
                 text: 'Codifique um texto primeiro',
-                icon: 'warning',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff'
+                icon: 'warning'
             });
             return;
         }
 
-        navigator.clipboard.writeText(textBase64).then(() => {
-            Swal.fire({
+        navigator.clipboard.writeText(conteudo).then(() => {
+            this.exibirAlerta({
                 title: 'Copiado!',
                 text: 'Texto Base64 copiado para área de transferência',
                 icon: 'success',
-                confirmButtonColor: '#ff6b35',
-                background: '#1a1a1a',
-                color: '#fff',
                 timer: 2000,
                 toast: true,
                 position: 'top-end'
@@ -793,9 +641,54 @@ class PhoenixApp {
         document.getElementById('textInput').value = '';
         document.getElementById('textBase64Output').value = '';
     }
+
+    // Métodos utilitários
+    exibirAlerta(config) {
+        Swal.fire({
+            title: config.title,
+            text: config.text || '',
+            icon: config.icon || 'info',
+            confirmButtonColor: '#ff6b35',
+            background: '#1a1a1a',
+            color: '#fff',
+            timer: config.timer,
+            toast: config.toast,
+            position: config.position
+        });
+    }
+
+    exibirCarregamento(mensagem) {
+        Swal.fire({
+            title: 'Processando...',
+            text: mensagem,
+            icon: 'info',
+            allowOutsideClick: false,
+            didOpen: (modal) => Swal.showLoading(),
+            background: '#1a1a1a',
+            color: '#fff'
+        });
+    }
+
+    confirmarAcao(titulo, mensagem, callback) {
+        Swal.fire({
+            title: titulo,
+            text: mensagem,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ff6b35',
+            cancelButtonColor: '#666',
+            confirmButtonText: 'Sim',
+            cancelButtonText: 'Cancelar',
+            background: '#1a1a1a',
+            color: '#fff'
+        }).then((resultado) => {
+            if (resultado.isConfirmed) {
+                callback();
+            }
+        });
+    }
 }
 
-// Iniciar app quando DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
-    window.app = new PhoenixApp();
+    window.app = new Phoenix();
 });

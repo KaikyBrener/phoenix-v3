@@ -1,4 +1,7 @@
-// Storage Manager - Gerencia dados locais no localStorage
+/**
+ * Gerenciador de Armazenamento
+ * Gerencia a persistência local de histórico, favoritos e estatísticas
+ */
 
 class StorageManager {
     constructor() {
@@ -7,7 +10,7 @@ class StorageManager {
         this.stats = this.carregarStats();
     }
 
-    // ===== HISTÓRICO =====
+    // Gerenciamento de histórico
     carregarHistorico() {
         const data = localStorage.getItem('phoenix_historico');
         return data ? JSON.parse(data) : [];
@@ -24,14 +27,14 @@ class StorageManager {
             tipo: item.tipo,
             tamanho: item.tamanho,
             base64: item.base64,
-            preview: item.preview, // imagem em miniatura
+            preview: item.preview,
             data: new Date().toLocaleString('pt-BR'),
             timestamp: Date.now()
         };
 
         this.historico.unshift(novoItem);
 
-        // Limitar a 100 itens
+        // Manter apenas 100 itens mais recentes
         if (this.historico.length > 100) {
             this.historico = this.historico.slice(0, 100);
         }
@@ -40,14 +43,14 @@ class StorageManager {
             this.salvarHistorico();
         } catch (e) {
             if (e.name === 'QuotaExceededError') {
-                // Se passou do limite, apagar itens antigos
+                // Fallback: manter apenas últimos 50 itens
                 this.historico = this.historico.slice(0, 50);
                 this.salvarHistorico();
             } else {
                 throw e;
             }
         }
-        
+
         this.atualizarStats('conversoes');
         return novoItem;
     }
@@ -66,7 +69,7 @@ class StorageManager {
         this.salvarHistorico();
     }
 
-    // ===== FAVORITOS =====
+    // Gerenciamento de favoritos
     carregarFavoritos() {
         const data = localStorage.getItem('phoenix_favoritos');
         return data ? JSON.parse(data) : [];
@@ -88,28 +91,25 @@ class StorageManager {
             timestamp: Date.now()
         };
 
-        // Verificar se já existe
-        const existe = this.favoritos.some(fav => fav.base64 === novoFavorito.base64);
-        
-        if (existe) {
+        // Verificar duplicatas
+        if (this.favoritos.some(fav => fav.base64 === novoFavorito.base64)) {
             return { sucesso: false, mensagem: 'Este item já está nos favoritos!' };
         }
 
         this.favoritos.unshift(novoFavorito);
-        
+
         try {
             this.salvarFavoritos();
         } catch (e) {
             if (e.name === 'QuotaExceededError') {
-                // Se passou do limite, apagar itens antigos dos favoritos
                 this.favoritos = this.favoritos.slice(0, Math.max(5, this.favoritos.length - 10));
                 this.salvarFavoritos();
-                return { sucesso: false, mensagem: 'Espaço de armazenamento cheio. Alguns favoritos antigos foram removidos.' };
+                return { sucesso: false, mensagem: 'Espaço de armazenamento cheio. Alguns favoritos foram removidos.' };
             } else {
                 throw e;
             }
         }
-        
+
         return { sucesso: true, mensagem: 'Adicionado aos favoritos!' };
     }
 
@@ -127,12 +127,16 @@ class StorageManager {
         this.salvarFavoritos();
     }
 
-    // ===== ESTATÍSTICAS =====
+    // Gerenciamento de estatísticas
     carregarStats() {
         const data = localStorage.getItem('phoenix_stats');
-        return data ? JSON.parse(data) : {
+        return data ? JSON.parse(data) : this._statsDefault();
+    }
+
+    _statsDefault() {
+        return {
             totalConversoes: 0,
-            conversioesHoje: 0,
+            conversoesHoje: 0,
             totalFavoritos: 0,
             ultimaConversao: null,
             dataUltimaLimpeza: new Date().toLocaleDateString('pt-BR')
@@ -147,20 +151,19 @@ class StorageManager {
         const hoje = new Date().toLocaleDateString('pt-BR');
         const ultimaLimpeza = this.stats.dataUltimaLimpeza;
 
-        // Se passou o dia, reseta conversões de hoje
+        // Resetar contador diário se for novo dia
         if (hoje !== ultimaLimpeza) {
-            this.stats.conversioesHoje = 0;
+            this.stats.conversoesHoje = 0;
             this.stats.dataUltimaLimpeza = hoje;
         }
 
         if (tipo === 'conversoes') {
             this.stats.totalConversoes++;
-            this.stats.conversioesHoje++;
+            this.stats.conversoesHoje++;
             this.stats.ultimaConversao = new Date().toLocaleString('pt-BR');
         }
 
         this.stats.totalFavoritos = this.favoritos.length;
-
         this.salvarStats();
     }
 
@@ -172,15 +175,8 @@ class StorageManager {
         localStorage.clear();
         this.historico = [];
         this.favoritos = [];
-        this.stats = {
-            totalConversoes: 0,
-            conversioesHoje: 0,
-            totalFavoritos: 0,
-            ultimaConversao: null,
-            dataUltimaLimpeza: new Date().toLocaleDateString('pt-BR')
-        };
+        this.stats = this._statsDefault();
     }
 }
 
-// Instância global
 const storage = new StorageManager();
