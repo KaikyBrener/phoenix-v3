@@ -8,6 +8,13 @@ class ConversorImagens {
         this.imagemAtual = null;
         this.base64Atual = null;
         this.metadadosAtual = null;
+        
+        // Estratégia Padrão (Retrocompatibilidade)
+        this.estrategia = new StandardConversionStrategy();
+    }
+
+    setEstrategia(estrategia) {
+        this.estrategia = estrategia;
     }
 
     validarImagem(arquivo) {
@@ -32,32 +39,19 @@ class ConversorImagens {
     }
 
     converterParaBase64(arquivo) {
-        return new Promise((resolve, reject) => {
-            const leitor = new FileReader();
-
-            leitor.onload = (e) => {
-                try {
-                    const stringBase64 = e.target.result;
-                    const metadados = {
-                        nome: arquivo.name,
-                        tipo: arquivo.type,
-                        tamanho: this._formatarTamanho(arquivo.size),
-                        tamanhoBruto: arquivo.size,
-                        dataCriacao: new Date().toLocaleString('pt-BR')
-                    };
-
-                    this.imagemAtual = arquivo;
-                    this.base64Atual = stringBase64;
-                    this.metadadosAtual = metadados;
-
-                    resolve({ base64: stringBase64, metadados });
-                } catch (erro) {
-                    reject(erro);
-                }
-            };
-
-            leitor.onerror = () => reject(new Error('Erro ao ler o arquivo'));
-            leitor.readAsDataURL(arquivo);
+        return new Promise(async (resolve, reject) => {
+            try {
+                // Delega o processamento real para a estratégia selecionada
+                const { base64, metadados } = await this.estrategia.processar(arquivo, this);
+                
+                this.imagemAtual = arquivo;
+                this.base64Atual = base64;
+                this.metadadosAtual = metadados;
+                
+                resolve({ base64, metadados });
+            } catch (erro) {
+                reject(erro);
+            }
         });
     }
 

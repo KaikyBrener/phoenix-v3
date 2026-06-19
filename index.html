@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHOENIX V2</title>
+    <title>PHOENIX V4</title>
 
     <link rel="icon" type="image/x-icon" href="/imagens/app.ico" />
 
@@ -25,65 +25,18 @@
     <a class="skip-link" href="#dashboard">Ir para o conteúdo</a>
     <div class="container-fluid min-vh-100 bg-dark app-shell">
         <div class="row h-100">
-            <!-- Sidebar -->
-            <nav class="col-lg-2 bg-darker sidebar phoenix-sidebar p-0" role="navigation" aria-label="Menu principal">
-                <div class="p-4 border-bottom border-secondary">
-                    <div class="d-flex align-items-center gap-2 sidebar-brand">
-                        <i data-lucide="zap" class="lucide-icon text-danger fs-3"></i>
-                        <span class="fw-bold text-white fs-5">PHOENIX V2</span>
-                    </div>
-                </div>
-
-                <div class="p-3">
-                    <div class="mb-4">
-                        <h6 class="text-danger text-uppercase fw-bold mb-3">Navegação</h6>
-                        <div class="nav flex-column">
-                            <button class="nav-link btn btn-link text-start text-white-50 mb-2 active" data-tab="dashboard">
-                                <i class="bi bi-house-fill me-2"></i> Dashboard
-                            </button>
-                            <button class="nav-link btn btn-link text-start text-white-50 mb-2" data-tab="conversor">
-                                <i class="bi bi-arrow-left-right me-2"></i> Conversor
-                            </button>
-                            <button class="nav-link btn btn-link text-start text-white-50 mb-2" data-tab="historico">
-                                <i class="bi bi-clock-history me-2"></i> Histórico
-                            </button>
-                            <button class="nav-link btn btn-link text-start text-white-50" data-tab="favoritos">
-                                <i class="bi bi-heart-fill me-2"></i> Favoritos
-                            </button>
-                        </div>
-                    </div>
-
-                    <hr class="border-secondary">
-
-                    <div class="mb-4">
-                        <h6 class="text-danger text-uppercase fw-bold mb-3">Ferramentas</h6>
-                        <div class="nav flex-column">
-                            <button class="nav-link btn btn-link text-start text-white-50 mb-2" data-tool="imagem-base64">
-                                <i class="bi bi-image me-2"></i> Imagem para Base64
-                            </button>
-                            <button class="nav-link btn btn-link text-start text-white-50 mb-2" data-tool="base64-imagem">
-                                <i class="bi bi-file-earmark-image me-2"></i> Base64 para Imagem
-                            </button>
-                            <button class="nav-link btn btn-link text-start text-white-50" data-tool="editor-texto">
-                                <i class="bi bi-pencil-square me-2"></i> Editor de Texto
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            <!-- Main Content -->
-            <main class="col-lg-10 p-4 app-main" role="main" aria-label="Conteúdo principal">
-                <!-- Offcanvas toggle (visible on small screens) -->
-                <button class="btn btn-primary mb-3 d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">
-                    <i class="bi bi-justify"></i>
+            <!-- Main Content (Full Width) -->
+            <main class="col-12 p-4 app-main" role="main" aria-label="Conteúdo principal">
+                <!-- Menu toggle button (always visible) -->
+                <button class="btn btn-outline-danger mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">
+                    <i class="bi bi-list me-2"></i>Menu
                 </button>
                 <!-- Dashboard Tab -->
                 <div class="tab-content dashboard-tab" id="dashboard" style="display: block;">
                     <div class="row mb-4">
                         <div class="col-12 dashboard-hero">
                             <p class="hero-kicker text-danger text-uppercase fw-semibold mb-2">Dashboard</p>
-                            <h2 class="text-white mb-2 dashboard-title">Bem-vindo ao <span class="text-danger phoenix-title-glow">PHOENIX V2</span></h2>
+                            <h2 class="text-white mb-2 dashboard-title">Bem-vindo ao <span class="text-danger phoenix-title-glow">PHOENIX V4</span></h2>
                             <p class="text-white-50 dashboard-subtitle mb-4">Converta suas imagens para Base64 de forma rápida, segura e eficiente.</p>
                             
                             <div class="d-inline-flex align-items-center px-3 py-2 rounded-pill" style="background: rgba(47, 191, 111, 0.1); border: 1px solid rgba(47, 191, 111, 0.3);">
@@ -171,32 +124,36 @@
 
                 <!-- Conversor Tab -->
                 <div class="tab-content section-tab" id="conversor" style="display: none;">
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h2 class="text-white mb-2">Conversor de Imagem</h2>
-                            <p class="text-white-50">Envie sua imagem e converta para Base64</p>
-                        </div>
-                    </div>
+                    <!-- Layout L/R wrapper -->
+                    <div class="row layout-lr-lock">
+                        <!-- COLUNA ESQUERDA (INPUT) -->
+                        <div class="col-lg-4 mb-4 layout-lr-col border-end border-secondary">
+                            <h2 class="text-white mb-2 fs-4">Conversor de Imagem</h2>
+                            <p class="text-white-50 small mb-4">Selecione o modo e envie a imagem</p>
 
-                    <div class="row">
-                        <!-- Upload Section -->
-                        <div class="col-lg-6 mb-4">
-                            <div class="card bg-darker border-danger border-2 panel-card">
-                                <div class="card-header bg-darker border-danger">
-                                    <h5 class="text-danger mb-0">
-                                        <i class="bi bi-cloud-arrow-up me-2"></i>1. Envie sua imagem
-                                    </h5>
+                            <!-- SELETOR DE MODO -->
+                            <div class="mb-4">
+                                <div class="segmented-control">
+                                    <input type="radio" name="conversionMode" id="modeStandard" value="standard" checked>
+                                    <label for="modeStandard">Padrão</label>
+                                    
+                                    <input type="radio" name="conversionMode" id="modeFacial" value="facial">
+                                    <label for="modeFacial">Biometria Facial</label>
                                 </div>
+                            </div>
+
+                            <!-- Upload Section -->
+                            <div class="card bg-darker border-danger border-2 panel-card mb-3">
                                 <div class="card-body">
-                                    <div class="upload-area border-2 border-dashed border-danger rounded p-5 text-center cursor-pointer" id="uploadArea">
-                                        <i class="bi bi-cloud-arrow-up text-danger fs-1 mb-3 d-block"></i>
-                                        <p class="text-white mb-2">Arraste sua imagem aqui ou clique para selecionar</p>
-                                        <small class="text-white-50 d-block mb-3">Suporte: PNG, JPG, JPEG, WEBP, GIF</small>
-                                        <small class="text-white-50 d-block">Tamanho máximo: 3MB</small>
+                                    <div class="upload-area border-2 border-dashed border-danger rounded p-4 text-center cursor-pointer" id="uploadArea">
+                                        <i class="bi bi-cloud-arrow-up text-danger fs-1 mb-2 d-block"></i>
+                                        <p class="text-white mb-2 fw-semibold">Arraste ou clique (Ctrl+V)</p>
+                                        <small class="text-white-50 d-block mb-2">Suporte: PNG, JPG, WEBP</small>
+                                        <small class="text-white-50 d-block">Max: 3MB</small>
                                         
-                                        <div class="mt-4 pt-3 border-top border-secondary opacity-75">
+                                        <div class="mt-3 pt-2 border-top border-secondary opacity-75">
                                             <small class="text-success d-block fw-medium">
-                                                <i class="bi bi-lock-fill me-1"></i> 100% Offline e Privado
+                                                <i class="bi bi-lock-fill me-1"></i> 100% Offline Privado
                                             </small>
                                         </div>
                                         <input type="file" id="imageInput" accept="image/*" style="display: none;">
@@ -205,85 +162,78 @@
                             </div>
                         </div>
 
-                        <!-- Preview Section -->
-                        <div class="col-lg-6 mb-4">
-                            <div class="card bg-darker border-secondary panel-card">
-                                <div class="card-header bg-darker border-secondary">
-                                    <h5 class="text-danger mb-0">
-                                        <i class="bi bi-eye me-2"></i>2. Pré-visualização
-                                    </h5>
-                                </div>
-                                <div class="card-body text-center">
-                                    <div id="previewContainer" style="min-height: 300px; display: flex; align-items: center; justify-content: center;">
-                                        <p class="text-white-50">Sua imagem aparecerá aqui</p>
+                        <!-- COLUNA DIREITA (OUTPUT) -->
+                        <div class="col-lg-8 mb-4 layout-lr-col">
+                            
+                            <!-- Preview e Estatísticas Lado a Lado -->
+                            <div class="row mb-3">
+                                <div class="col-md-5">
+                                    <div id="previewContainer" style="height: 180px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid var(--border-color);">
+                                        <p class="text-white-50 small">Sua imagem aparecerá aqui</p>
                                     </div>
-                                    <div id="imageInfo" style="display: none;" class="mt-3 text-start">
-                                        <small class="text-white-50">
-                                            Nome: <span class="text-white" id="imageName">-</span><br>
-                                            Tipo: <span class="text-white" id="imageType">-</span><br>
-                                            Tamanho: <span class="text-white" id="imageSize">-</span>
-                                        </small>
+                                </div>
+                                <div class="col-md-7">
+                                    <div id="imageInfo" style="display: none;">
+                                        <!-- Estatísticas Padrão (Grid) -->
+                                        <div id="standardStats" class="stats-grid mt-2">
+                                            <div class="stat-box"><small>Tamanho Imagem</small><span id="tamanhoImagem">-</span></div>
+                                            <div class="stat-box highlight"><small>Tamanho Base64</small><span id="tamanhoBase64">-</span></div>
+                                            <div class="stat-box"><small>Proporção</small><span id="proporcao">-</span></div>
+                                            <div class="stat-box"><small>Nome</small><span id="imageName" class="text-truncate" style="max-width: 150px; display: inline-block;">-</span></div>
+                                        </div>
+                                        
+                                        <!-- Estatísticas Avançadas (Cadastro Facial) -->
+                                        <div id="advancedStats" style="display: none;">
+                                            <div class="d-flex align-items-center mb-2 mt-1">
+                                                <i class="bi bi-person-bounding-box text-success me-2"></i>
+                                                <h6 class="text-success mb-0" style="font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">Otimização Biométrica Ativa</h6>
+                                            </div>
+                                            <div class="stats-grid">
+                                                <div class="stat-box"><small>Resolução Final</small><span id="statResFinal">-</span></div>
+                                                <div class="stat-box highlight"><small>Redução Tamanho</small><span id="statReduction">-</span></div>
+                                                <div class="stat-box"><small>De</small><span id="statSizeOriginal">-</span></div>
+                                                <div class="stat-box"><small>Para</small><span id="statSizeFinal" class="text-success">-</span></div>
+                                            </div>
+                                            <div class="d-none">
+                                                <!-- Hidden fields to keep JS intact -->
+                                                <span id="statResOriginal"></span>
+                                                <span id="statFormat"></span>
+                                                <span id="statJpeg"></span>
+                                                <span id="statBase64Len"></span>
+                                                <span id="imageType"></span>
+                                                <span id="imageSize"></span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- Base64 Output -->
-                    <div class="row">
-                        <div class="col-12 mb-4">
-                            <div class="card bg-darker border-secondary panel-card">
-                                <div class="card-header bg-darker border-secondary">
-                                    <h5 class="text-danger mb-0">
-                                        <i class="bi bi-code me-2"></i>3. Código Base64
-                                    </h5>
+                            <!-- Base64 Output -->
+                            <div class="card bg-darker border-secondary panel-card mb-3">
+                                <div class="card-header bg-darker border-secondary d-flex justify-content-between align-items-center py-2">
+                                    <h6 class="text-white mb-0 fs-6"><i class="bi bi-code-slash me-2 text-danger"></i>Código Base64</h6>
+                                    <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50" id="autoCopyBadge" style="display: none;"><i class="bi bi-clipboard-check me-1"></i>Auto-Copiado</span>
                                 </div>
-                                <div class="card-body">
-                                    <textarea class="form-control bg-darker text-white border-secondary" id="base64Output" rows="6" placeholder="Seu código Base64 aparecerá aqui..." readonly></textarea>
-                                    <div class="d-flex gap-2 mt-3">
-                                        <button class="btn btn-danger" id="copyBtn" disabled>
-                                            <i class="bi bi-files me-2"></i>Copiar Código
+                                <div class="card-body p-2">
+                                    <textarea class="form-control bg-dark text-white border-secondary base64-textarea-fixed mb-2" id="base64Output" placeholder="Resultado Base64..." readonly></textarea>
+                                    
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <button class="btn btn-danger btn-sm" id="copyBtn" disabled>
+                                            <i class="bi bi-files me-1"></i>Copiar Manual
                                         </button>
-                                        <button class="btn btn-outline-danger" id="downloadBtn" disabled>
-                                            <i class="bi bi-download me-2"></i>Download TXT
+                                        <button class="btn btn-outline-danger btn-sm" id="downloadBtn" disabled>
+                                            <i class="bi bi-download me-1"></i>TXT
                                         </button>
-                                        <button class="btn btn-outline-danger" id="addFavoriteBtn" disabled>
-                                            <i class="bi bi-heart me-2"></i>Adicionar aos Favoritos
+                                        <button class="btn btn-outline-danger btn-sm" id="addFavoriteBtn" disabled>
+                                            <i class="bi bi-heart me-1"></i>Favorito
                                         </button>
-                                        <button class="btn btn-outline-danger ms-auto" id="limparBtn">
-                                            <i class="bi bi-trash me-2"></i>Limpar Tudo
+                                        <button class="btn btn-outline-secondary btn-sm ms-auto" id="limparBtn">
+                                            <i class="bi bi-trash me-1"></i>Limpar
                                         </button>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <!-- Stats -->
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <div class="card bg-darker border-secondary metric-card">
-                                <div class="card-body">
-                                    <p class="text-white-50 mb-1">Tamanho da Imagem</p>
-                                    <h5 class="text-danger mb-0" id="tamanhoImagem">-</h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="card bg-darker border-secondary metric-card">
-                                <div class="card-body">
-                                    <p class="text-white-50 mb-1">Tamanho do Base64</p>
-                                    <h5 class="text-danger mb-0" id="tamanhoBase64">-</h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="card bg-darker border-secondary metric-card">
-                                <div class="card-body">
-                                    <p class="text-white-50 mb-1">Proporção</p>
-                                    <h5 class="text-danger mb-0" id="proporcao">-</h5>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -476,55 +426,62 @@
     
     <!-- Application modules -->
     <script src="js/storage.js"></script>
+    <script src="js/services.js"></script>
     <script src="js/conversor.js"></script>
     <script src="js/main.js"></script>
 
-    <!-- Offcanvas for sidebar (small screens) -->
-        <div class="offcanvas offcanvas-start phoenix-offcanvas" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
-            <div class="offcanvas-header border-bottom border-secondary">
-        <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">PHOENIX V2</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-      </div>
-      <div class="offcanvas-body">
-        <nav class="p-0">
-            <div class="p-3">
+    <!-- Offcanvas Sidebar (Body scroll + Backdrop) -->
+    <div class="offcanvas offcanvas-start phoenix-offcanvas" data-bs-scroll="true" data-bs-backdrop="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
+        <div class="offcanvas-header border-bottom border-secondary">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-lightning-charge-fill text-danger fs-4"></i>
+                <h5 class="offcanvas-title mb-0" id="offcanvasWithBothOptionsLabel">PHOENIX V4</h5>
+            </div>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <nav class="p-0">
                 <div class="mb-4">
                     <h6 class="text-danger text-uppercase fw-bold mb-3">Navegação</h6>
-                        <div class="nav flex-column">
-                            <button class="nav-link btn btn-link text-start text-white-50 mb-2 active" data-tab="dashboard" data-bs-dismiss="offcanvas" aria-controls="dashboard">
-                                <i class="bi bi-house-fill me-2" aria-hidden="true"></i> Dashboard
-                            </button>
-                            <button class="nav-link btn btn-link text-start text-white-50 mb-2" data-tab="conversor" data-bs-dismiss="offcanvas" aria-controls="conversor">
-                                <i class="bi bi-arrow-left-right me-2" aria-hidden="true"></i> Conversor
-                            </button>
-                            <button class="nav-link btn btn-link text-start text-white-50 mb-2" data-tab="historico" data-bs-dismiss="offcanvas" aria-controls="historico">
-                                <i class="bi bi-clock-history me-2" aria-hidden="true"></i> Histórico
-                            </button>
-                            <button class="nav-link btn btn-link text-start text-white-50" data-tab="favoritos" data-bs-dismiss="offcanvas" aria-controls="favoritos">
-                                <i class="bi bi-heart-fill me-2" aria-hidden="true"></i> Favoritos
-                            </button>
+                    <div class="nav flex-column">
+                        <button class="nav-link btn btn-link text-start text-white-50 mb-2 active" data-tab="dashboard" data-bs-dismiss="offcanvas">
+                            <i class="bi bi-house-fill me-2" aria-hidden="true"></i> Dashboard
+                        </button>
+                        <button class="nav-link btn btn-link text-start text-white-50 mb-2" data-tab="conversor" data-bs-dismiss="offcanvas">
+                            <i class="bi bi-arrow-left-right me-2" aria-hidden="true"></i> Conversor
+                        </button>
+                        <button class="nav-link btn btn-link text-start text-white-50 mb-2" data-tab="historico" data-bs-dismiss="offcanvas">
+                            <i class="bi bi-clock-history me-2" aria-hidden="true"></i> Histórico
+                        </button>
+                        <button class="nav-link btn btn-link text-start text-white-50" data-tab="favoritos" data-bs-dismiss="offcanvas">
+                            <i class="bi bi-heart-fill me-2" aria-hidden="true"></i> Favoritos
+                        </button>
                     </div>
                 </div>
 
-                <hr>
+                <hr class="border-secondary">
 
                 <div class="mb-4">
                     <h6 class="text-danger text-uppercase fw-bold mb-3">Ferramentas</h6>
-                        <div class="nav flex-column">
-                            <button class="nav-link btn btn-link text-start text-white-50 mb-2" data-tool="imagem-base64" data-bs-dismiss="offcanvas" aria-controls="conversor">
-                                <i class="bi bi-image me-2" aria-hidden="true"></i> Imagem para Base64
-                            </button>
-                            <button class="nav-link btn btn-link text-start text-white-50 mb-2" data-tool="base64-imagem" data-bs-dismiss="offcanvas" aria-controls="base64-imagem">
-                                <i class="bi bi-file-earmark-image me-2" aria-hidden="true"></i> Base64 para Imagem
-                            </button>
-                            <button class="nav-link btn btn-link text-start text-white-50" data-tool="editor-texto" data-bs-dismiss="offcanvas" aria-controls="editor-texto">
-                                <i class="bi bi-pencil-square me-2" aria-hidden="true"></i> Editor de Texto
-                            </button>
+                    <div class="nav flex-column">
+                        <button class="nav-link btn btn-link text-start text-white-50 mb-2" data-tool="imagem-base64" data-bs-dismiss="offcanvas">
+                            <i class="bi bi-image me-2" aria-hidden="true"></i> Imagem para Base64
+                        </button>
+                        <button class="nav-link btn btn-link text-start text-white-50 mb-2" data-tool="base64-imagem" data-bs-dismiss="offcanvas">
+                            <i class="bi bi-file-earmark-image me-2" aria-hidden="true"></i> Base64 para Imagem
+                        </button>
+                        <button class="nav-link btn btn-link text-start text-white-50" data-tool="editor-texto" data-bs-dismiss="offcanvas">
+                            <i class="bi bi-pencil-square me-2" aria-hidden="true"></i> Editor de Texto
+                        </button>
                     </div>
                 </div>
-            </div>
-        </nav>
-      </div>
+            </nav>
+        </div>
     </div>
+
+    <!-- Floating GitHub Icon -->
+    <a href="https://github.com/KaikyBrener" target="_blank" rel="noopener noreferrer" class="position-fixed bottom-0 end-0 m-4 d-flex align-items-center justify-content-center text-white-50" style="width: 48px; height: 48px; background: rgba(20, 20, 20, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50%; z-index: 1050; backdrop-filter: blur(10px); transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.5);" onmouseover="this.classList.remove('text-white-50'); this.classList.add('text-white'); this.style.transform='translateY(-3px)'; this.style.borderColor='rgba(255, 107, 26, 0.5)'; this.style.boxShadow='0 8px 24px rgba(255, 107, 26, 0.2)';" onmouseout="this.classList.remove('text-white'); this.classList.add('text-white-50'); this.style.transform='none'; this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.5)';">
+        <i class="bi bi-github fs-4"></i>
+    </a>
 </body>
 </html>

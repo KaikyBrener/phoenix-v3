@@ -1,5 +1,10 @@
 // App Main - Controla toda a aplicação
 
+// Configuração Central
+const CONFIG = {
+    autoCopy: true
+};
+
 class PhoenixApp {
     constructor() {
         this.converter = converter;
@@ -44,6 +49,38 @@ class PhoenixApp {
             if (e.target.files[0]) {
                 this.processarArquivo(e.target.files[0]);
             }
+        });
+
+        // Suporte a Clipboard (Ctrl+V)
+        window.addEventListener('paste', (e) => {
+            const clipboardData = e.clipboardData || window.clipboardData;
+            if (clipboardData && clipboardData.files && clipboardData.files.length > 0) {
+                const file = clipboardData.files[0];
+                if (file.type.startsWith('image/')) {
+                    // Força a navegação para a aba do conversor
+                    this.mudarAba('conversor');
+                    // Processa o arquivo como se tivesse sido upado
+                    this.processarArquivo(file);
+                }
+            }
+        });
+
+        // Radio Buttons de Modo de Conversão
+        const radiosMode = document.querySelectorAll('input[name="conversionMode"]');
+        const facialModeBadges = document.getElementById('facialModeBadges');
+        
+        radiosMode.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'facial') {
+                    this.converter.setEstrategia(new FacialConversionStrategy());
+                    if (facialModeBadges) facialModeBadges.style.display = 'block';
+                } else {
+                    this.converter.setEstrategia(new StandardConversionStrategy());
+                    if (facialModeBadges) facialModeBadges.style.display = 'none';
+                }
+                // Limpar resultado anterior ao trocar de modo
+                this.limparConversor();
+            });
         });
 
         // Botões de ação
@@ -143,19 +180,56 @@ class PhoenixApp {
         document.getElementById('tamanhoBase64').textContent = imagemAtual ? this.converter.calcularTamanhoReduzido(imagemAtual) : '-';
         document.getElementById('proporcao').textContent = imagemAtual ? this.converter.calcularProporção(imagemAtual) : '-';
 
+        // Estatísticas Avançadas (Cadastro Facial)
+        const advancedStats = document.getElementById('advancedStats');
+        if (metadados.estrategia === 'facial') {
+            document.getElementById('statResOriginal').textContent = metadados.resolucaoOriginal;
+            document.getElementById('statResFinal').textContent = metadados.resolucaoFinal;
+            document.getElementById('statSizeOriginal').textContent = metadados.tamanhoOriginalStr;
+            document.getElementById('statSizeFinal').textContent = metadados.tamanho;
+            document.getElementById('statReduction').textContent = metadados.percentualReducao + '%';
+            document.getElementById('statFormat').textContent = metadados.tipo;
+            document.getElementById('statJpeg').textContent = metadados.compressaoJPEG;
+            document.getElementById('statBase64Len').textContent = metadados.base64Length.toLocaleString('pt-BR');
+            
+            // Sobrescreve cálculo antigo que é irrelevante no facial
+            document.getElementById('tamanhoBase64').textContent = metadados.tamanho;
+            document.getElementById('proporcao').textContent = '-';
+            
+            advancedStats.style.display = 'block';
+        } else {
+            advancedStats.style.display = 'none';
+        }
+
         // Habilitar botões
         document.getElementById('copyBtn').disabled = false;
         document.getElementById('downloadBtn').disabled = false;
         document.getElementById('addFavoriteBtn').disabled = false;
+
+        // Auto-Copy
+        if (CONFIG.autoCopy) {
+            // Pequeno delay para garantir que a renderização do textarea terminou
+            setTimeout(() => {
+                this.copiarBase64(true);
+            }, 100);
+        }
     }
 
     // ===== AÇÕES =====
-    copiarBase64() {
+    copiarBase64(isAuto = false) {
         const base64Output = document.getElementById('base64Output');
         navigator.clipboard.writeText(base64Output.value).then(() => {
-            AlertHelper.toast('Copiado!', 'success', {
-                text: 'Base64 copiado para a área de transferência'
-            });
+            if (isAuto) {
+                const badge = document.getElementById('autoCopyBadge');
+                if (badge) badge.style.display = 'inline-block';
+                AlertHelper.toast('Auto-Copiado!', 'success', {
+                    text: 'O Base64 já está na sua área de transferência.'
+                });
+            } else {
+                AlertHelper.toast('Copiado!', 'success', {
+                    text: 'Base64 copiado para a área de transferência'
+                });
+            }
         }).catch(() => {
             AlertHelper.toast('Erro', 'error', {
                 text: 'Falha ao copiar'
@@ -218,6 +292,9 @@ class PhoenixApp {
                 document.getElementById('tamanhoImagem').textContent = '-';
                 document.getElementById('tamanhoBase64').textContent = '-';
                 document.getElementById('proporcao').textContent = '-';
+
+                const badge = document.getElementById('autoCopyBadge');
+                if (badge) badge.style.display = 'none';
 
                 AlertHelper.toast('Limpo!', 'success', {
                     text: 'Tudo foi limpo com sucesso'

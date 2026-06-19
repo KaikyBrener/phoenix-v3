@@ -784,3 +784,94 @@ textarea.form-control {
     background: rgba(255, 107, 26, 0.08) !important;
     color: #fff !important;
 }
+
+/* ========================================= */
+/* PHOENIX V4 - ESTRUTURA DE LAYOUT (L/R)    */
+/* ========================================= */
+@media (min-width: 992px) {
+    .layout-lr-lock {
+        height: calc(100vh - 120px);
+        overflow: hidden;
+    }
+    .layout-lr-col {
+        height: 100%;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+}
+
+/* ========================================= */
+/* SEGMENTED CONTROL (Modo de Conversão)     */
+/* ========================================= */
+.segmented-control {
+    display: flex;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 12px;
+    padding: 4px;
+    border: 1px solid var(--border-color);
+}
+.segmented-control input[type="radio"] {
+    display: none;
+}
+.segmented-control label {
+    flex: 1;
+    text-align: center;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+.segmented-control input[type="radio"]:checked + label {
+    background: rgba(255, 107, 26, 0.15);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255, 107, 26, 0.3);
+}
+
+/* ========================================= */
+/* BASE64 TEXTAREA CONSTRAINTS               */
+/* ========================================= */
+.base64-textarea-fixed {
+    height: 180px !important;
+    min-height: 180px !important;
+    max-height: 180px !important;
+    overflow-y: auto !important;
+    word-break: break-all !important;
+    resize: none !important;
+}
+
+/* ========================================= */
+/* DATA GRID ESTATÍSTICAS                    */
+/* ========================================= */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+.stat-box {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 10px;
+}
+.stat-box small {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+}
+.stat-box span {
+    display: block;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+.stat-box.highlight {
+    border-color: rgba(47, 191, 111, 0.3);
+    background: rgba(47, 191, 111, 0.05);
+}
+.stat-box.highlight span {
+    color: #2fbf6f;
+}
