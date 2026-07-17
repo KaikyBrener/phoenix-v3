@@ -79,7 +79,7 @@ class PhoenixApp {
                     if (facialModeBadges) facialModeBadges.style.display = 'none';
                 }
                 // Limpar resultado anterior ao trocar de modo
-                this.limparConversor();
+                 this.limparConversorSilencioso();
             });
         });
 
@@ -181,8 +181,17 @@ class PhoenixApp {
         document.getElementById('proporcao').textContent = imagemAtual ? this.converter.calcularProporção(imagemAtual) : '-';
 
         // Estatísticas Avançadas (Cadastro Facial)
-        const advancedStats = document.getElementById('advancedStats');
+       const advancedStats = document.getElementById('advancedStats');
+
         if (metadados.estrategia === 'facial') {
+            // Remove o prefixo "data:image/...;base64," para exibir apenas o Base64 puro
+            const base64SemPrefixo = base64.includes(',')
+                ? base64.substring(base64.indexOf(',') + 1)
+                : base64;
+
+            // Atualiza o textarea para mostrar somente o Base64 puro
+            document.getElementById('base64Output').value = base64SemPrefixo;
+
             document.getElementById('statResOriginal').textContent = metadados.resolucaoOriginal;
             document.getElementById('statResFinal').textContent = metadados.resolucaoFinal;
             document.getElementById('statSizeOriginal').textContent = metadados.tamanhoOriginalStr;
@@ -190,12 +199,15 @@ class PhoenixApp {
             document.getElementById('statReduction').textContent = metadados.percentualReducao + '%';
             document.getElementById('statFormat').textContent = metadados.tipo;
             document.getElementById('statJpeg').textContent = metadados.compressaoJPEG;
-            document.getElementById('statBase64Len').textContent = metadados.base64Length.toLocaleString('pt-BR');
-            
+
+            // Comprimento do Base64 sem o prefixo
+            document.getElementById('statBase64Len').textContent =
+                base64SemPrefixo.length.toLocaleString('pt-BR');
+
             // Sobrescreve cálculo antigo que é irrelevante no facial
             document.getElementById('tamanhoBase64').textContent = metadados.tamanho;
             document.getElementById('proporcao').textContent = '-';
-            
+
             advancedStats.style.display = 'block';
         } else {
             advancedStats.style.display = 'none';
@@ -276,31 +288,24 @@ class PhoenixApp {
         }
     }
 
-    limparConversor() {
-        AlertHelper.confirm('Limpar tudo?', 'Isso vai limpar a imagem, preview e Base64', {
-            confirmButtonText: 'Sim, limpar',
-            cancelButtonText: 'Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                this.converter.limpar();
-                document.getElementById('base64Output').value = '';
-                document.getElementById('previewContainer').innerHTML = '<p class="text-white-50">Sua imagem aparecerá aqui</p>';
-                document.getElementById('imageInfo').style.display = 'none';
-                document.getElementById('copyBtn').disabled = true;
-                document.getElementById('downloadBtn').disabled = true;
-                document.getElementById('addFavoriteBtn').disabled = true;
-                document.getElementById('tamanhoImagem').textContent = '-';
-                document.getElementById('tamanhoBase64').textContent = '-';
-                document.getElementById('proporcao').textContent = '-';
+        limparConversorSilencioso() {
+        this.converter.limpar();
 
-                const badge = document.getElementById('autoCopyBadge');
-                if (badge) badge.style.display = 'none';
+        document.getElementById('base64Output').value = '';
+        document.getElementById('previewContainer').innerHTML = '<p class="text-white-50">Sua imagem aparecerá aqui</p>';
+        document.getElementById('imageInfo').style.display = 'none';
+        document.getElementById('copyBtn').disabled = true;
+        document.getElementById('downloadBtn').disabled = true;
+        document.getElementById('addFavoriteBtn').disabled = true;
+        document.getElementById('tamanhoImagem').textContent = '-';
+        document.getElementById('tamanhoBase64').textContent = '-';
+        document.getElementById('proporcao').textContent = '-';
 
-                AlertHelper.toast('Limpo!', 'success', {
-                    text: 'Tudo foi limpo com sucesso'
-                });
-            }
-        });
+        const badge = document.getElementById('autoCopyBadge');
+        if (badge) badge.style.display = 'none';
+
+        const advancedStats = document.getElementById('advancedStats');
+        if (advancedStats) advancedStats.style.display = 'none';
     }
 
     limparHistorico() {
